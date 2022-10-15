@@ -107,9 +107,6 @@ class JobsSearchForm {
         this.initMobileHiding();
     }
     initMobileHiding() {
-        this.proximityContainer.classList.add("__mobile-hidden");
-        this.submitContainer.classList.add("__mobile-hidden");
-
         this.keywordsInput.addEventListener("focus", () => {
             this.proximityContainer.classList.remove("__mobile-hidden");
             this.submitContainer.classList.remove("__mobile-hidden");

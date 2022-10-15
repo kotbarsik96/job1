@@ -607,7 +607,7 @@ class ButtonShowMore {
 
         let textOnToggle = this.input.dataset.showMoreText;
         textOnToggle = textOnToggle ? textOnToggle.split(", ") : textOnToggle;
-        if(textOnToggle) {
+        if (textOnToggle) {
             this.textOnShow = textOnToggle[0];
             this.textOnHide = textOnToggle[1] || textOnToggle[0];
         }
@@ -788,6 +788,8 @@ class BackToTopButton {
 // спойлеры
 class Spoiler {
     constructor(spoiler) {
+        this.onDocumentClick = this.onDocumentClick.bind(this);
+
         this.spoiler = observeNodeBeforeInit(spoiler);
         this.hideable = this.spoiler.querySelector(".spoiler__hideable");
         this.button = this.spoiler.querySelector(".spoiler__button");
@@ -796,6 +798,35 @@ class Spoiler {
 
         this.button.addEventListener("click", this.toggle.bind(this));
         this.hide();
+
+        if (this.spoiler.hasAttribute("data-spoiler-click-closable")) {
+            const queries = this.spoiler.dataset.spoilerClickClosable.split(", ");
+            this.mediaQueries = queries.map(query => {
+                const split = query.split(" ");
+                return { mediaValue: split[0], boolean: split[1] };
+            });
+            this.mediaQueries.forEach(mdq => {
+                onQueryChange = onQueryChange.bind(this);
+
+                const query = window.matchMedia(`(min-width: ${mdq.mediaValue}px)`);
+                onQueryChange();
+                query.addEventListener("change", onQueryChange);
+
+                function onQueryChange() {
+                    const isRemoveHandler = mdq.boolean == "true" && !query.matches
+                        || mdq.boolean == "false" && query.matches;
+                    const isAddHandler = mdq.boolean == "true" && query.matches;
+
+                    if (isRemoveHandler)
+                        document.removeEventListener("click", this.onDocumentClick);
+                    if (isAddHandler) document.addEventListener("click", this.onDocumentClick);
+                }
+            });
+        }
+    }
+    onDocumentClick(event) {
+        if (event.target.closest(".spoiler") !== this.spoiler && event.target !== this.spoiler)
+            this.hide();
     }
     toggle() {
         if (this.isHidden) this.show();
