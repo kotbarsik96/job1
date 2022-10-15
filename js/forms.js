@@ -1,1 +1,1872 @@
-const forms_observingNodesKeys=["input","button","checkbox","selectionField","link","inputWrapper","rangeBlock","imageBlock"];function justifyAddButtonsHeight(){function t(){[".add-field--education"].forEach((t=>{const e=Array.from(document.querySelectorAll(t));e.forEach((t=>t.style.removeProperty("min-height")));const s=e.map((t=>t.offsetHeight)),i=Math.max(...s);e.forEach((t=>t.style.minHeight=`${i}px`))}))}t(),window.addEventListener("resize",t)}justifyAddButtonsHeight();class AddFields{constructor(t){if(this.button=t,this.container=t.closest(".forms__container"),this.maxFields=parseInt(t.dataset.addMax)||100,this.showAmount=parseInt(t.dataset.addShow)||0,this.removeButton=createElement("button","add-field__remove"),this.fields=[],t.removeAttribute("data-add-max"),t.removeAttribute("data-add-show"),this.title=this.container.querySelector(".add-field__title"),this.groups=Array.from(this.container.querySelectorAll("[data-add-group]")),this.fieldsAmount=0,this.askConfirmation=this.askConfirmation.bind(this),this.groups.forEach((t=>t.remove())),t.addEventListener("click",(()=>this.addField())),this.showAmount)for(let t=0;t<this.showAmount;t++)this.addField()}addField(){if(this.fieldsAmount+1>this.maxFields)return;this.fieldsAmount++;const t=this.groups.map((t=>t.cloneNode(!0)));if(this.fields.push(t),t.forEach((t=>this.addGroup(t))),this.fieldsAmount>this.showAmount){const e=createElement("button","add-field__remove-button icon-bin","Удалить блок");e.setAttribute("title","Удалить блок"),t[t.length-1].before(e),e.addEventListener("click",(s=>{s.preventDefault(),this.askConfirmation(t,e)}))}this.container.append(this.button),this.fieldsAmount>=this.maxFields&&this.button.remove()}addGroup(t){if(t.dataset.addGroup){const e=parseInt(t.dataset.addGroup.split(":")[1]);if(e){if(this.fieldsAmount<=e&&e>0)return;if(e<0&&this.fieldsAmount>Math.abs(e))return}}const e=`_${this.fieldsAmount}`;t.removeAttribute("data-add-group");const s=Array.from(t.querySelectorAll("input"));Array.from(t.querySelectorAll("label")).forEach((t=>{const s=t.getAttribute("for");s&&t.setAttribute("for",s+e)})),s.forEach((t=>{const s=t.getAttribute("id"),i=t.getAttribute("name");s&&t.setAttribute("id",s+e),i&&t.setAttribute("name",i+e)})),this.container.append(t)}askConfirmation(t,e){function s(){e.remove(),this.removeField(t)}s=s.bind(this),modal.createBasicModal("Удалить блок?","Будет удален выбранный блок",{text:"Удалить",confirmCallback:s},"Не удалять"),modal.getModalBody().classList.add("modal__body--small")}removeField(t){const e=this.fields.findIndex((e=>e===t));if(e>=0){this.fields[e].forEach((t=>t.remove())),this.fields.splice(e,1),this.fieldsAmount--}this.fieldsAmount<this.maxFields&&this.container.append(this.button)}}class AddFieldsCheckbox{constructor(t){this.checkbox=t,this.addGroupName=t.dataset.addGroupCheckbox,this.group=t.closest(".forms__fields-group"),this.addFields=Array.from(this.group.querySelectorAll(`[data-add-group="${this.addGroupName}"]`)),this.toggleGroups(),this.checkbox.addEventListener("change",(()=>this.toggleGroups()))}toggleGroups(){this.checkbox.checked?this.addGroup():this.removeGroup()}addGroup(){this.addFields.map((t=>t)).reverse().forEach((t=>{t.closest("body")||this.checkbox.parentNode.after(t),t.removeAttribute("data-add-group")}))}removeGroup(){this.addFields.forEach((t=>t.remove()))}}class InputGroup{group;inputParams;uncompleteParagraph;constructor(t,e){this.group=t;this.group.querySelector(".forms__fields-uncompleted:not(.__mobile)")||(this.uncompleteParagraph=createElement("p","forms__fields-uncompleted __desktop"),this.group.append(this.uncompleteParagraph));const s=Array.from(t.querySelectorAll("input")).map((t=>t.name));this.inputParams=e.filter((t=>s.includes(t.name))),this.inputParams.forEach((t=>{t.inputs?t.inputs.forEach((t=>{t.addEventListener("change",this.checkCompletion.bind(this)),document.querySelector("#form").addEventListener("submit",this.checkCompletion.bind(this))})):t.input&&t.input.addEventListener("blur",this.checkCompletion.bind(this))}))}checkCompletion(){setTimeout((()=>{const t=this.inputParams.filter((t=>!t.isCompleted));Boolean(t.length>0)?(this.group.classList.add("__uncomplete"),this.createUncompleteMessage(t)):this.group.classList.remove("__uncomplete")}),0)}createUncompleteMessage(t){if(this.uncompleteParagraph){let e="";const s=t.map((t=>t.ariaLabel));s[0]&&(s.forEach(((t,s)=>{t=t.toLowerCase(),e+=0==s?" "+t:", "+t})),e&&(e+=".",this.uncompleteParagraph.textContent="Пожалуйста, укажите: "+e))}}}class Input{fieldGroup;name;ariaLabel;constructor(t){this.fieldGroup=t.closest(".forms__fields-group")}}class TextInput extends Input{input;inputWrapper;inputGroup;completeCondition;mask;options;constructor(t){super(t),this.input=t,this.name=t.name,this.ariaLabel=t.getAttribute("aria-label"),this.inputGroup=this.input.closest(".forms__fields-group"),this.input.classList.contains("field__wrapper")?this.inputWrapper=this.input:this.inputWrapper=this.input.closest(".field__wrapper"),t.dataset.mask&&this.createMask(),this.getCompleteConditions(),this.getOptions(),this.input.addEventListener("focus",this.onFocus.bind(this)),this.input.addEventListener("blur",this.onBlur.bind(this)),this.input.addEventListener("change",this.onBlur.bind(this)),this.input.hasAttribute("data-numbers-only")&&this.input.addEventListener("input",this.typeNumberOnly.bind(this))}getCompleteConditions(){const t=this.mask,e=this.input.dataset.completeLength,s=this.input.hasAttribute("data-complete-match");if(t){let e,s=t.length;this.completeCondition={minLength:s,maxLength:e}}else if(e){const t=e.split(", ");this.completeCondition={minLength:t[0],maxLength:t[1]}}else if(s){let t=this.input.dataset.completeMatch,e=[];e=t?t.split("|"):Array.from(document.querySelectorAll(".field__options-item")).map((t=>t.textContent||t.innerText)),this.completeCondition={match:e}}else this.completeCondition={minLength:0}}getOptions(){this.options=Array.from(this.inputWrapper.closest(".field").querySelectorAll(".field__options-item")),this.options.forEach((t=>{t.addEventListener("pointerdown",(()=>{this.input.focus(),this.input.value=t.textContent||t.innerText}))}))}onFocus(){this.inputWrapper.classList.add("__focus")}onBlur(){this.checkCompletion(),this.inputWrapper.classList.remove("__focus")}typeNumberOnly(t){const e=t.data;parseInt(e)>=0||(t.target.value=t.target.value.replace(e,"_"))}createMask(){const t=this.input.dataset.mask;if(!t)return;this.mask=t,this.input.removeAttribute("data-mask"),s=s.bind(this),this.mask=t;const e=this.input;function s(s){const i=t.split("");let n="";if("input"===s.type&&s.data){const t=e.value.split(""),s=t.splice(e.selectionStart-1,1);e.value=t.join("")+s}for(let t=0;t<i.length;t++){if("_"===i[t]){if(e.value[t]){n+=e.value[t];continue}break}n+=i[t]}e.value=n}e.hasAttribute("placeholder")||e.setAttribute("placeholder",t),e.addEventListener("focus",s),e.addEventListener("pointerdown",s),e.addEventListener("input",s)}tabBetweenInputs(t){const e=t.target,s=e.getAttribute("maxlength");if(e.value.length==s||0==e.value.length){const s=e.parentNode,i=Array.from(s.childNodes).filter((t=>t.classList.contains("field__input"))),n=i.findIndex((t=>t==e));if(t.data||0!=e.value.length){const t=i[n+1];t&&t.focus()}else{const t=i[n-1];t&&t.focus()}}}checkCompletion(){const t=this.completeCondition;let e=this.input.value;if(t.match)t.match.includes(e)?this.isCompleted=!0:this.isCompleted=!1;else if(t.minLength>=0){let s=!1;s=t.maxLength?e.length>=t.minLength&&e.length<=t.maxLength:e.length>=t.minLength,this.input.value.includes("_")&&(s=!1),this.isCompleted=s}this.setCompletedState()}setCompletedState(){if(!0===this.isCompleted)this.inputWrapper.classList.remove("__uncomplete");else this.inputWrapper.classList.add("__uncomplete")}}class TextSelect extends TextInput{constructor(t){super(t),this.optionsUl=this.inputWrapper.querySelector(".text-select__options"),this.optionItems=this.inputWrapper.querySelectorAll(".text-select__option-item"),this.setItemsHandler()}setItemsHandler(){this.optionItems.forEach((t=>{t.addEventListener("pointerdown",(t=>{this.input.value=t.target.textContent||t.target.innerText,this.input.dispatchEvent(new Event("change"))}))}))}}class TextSelectWorkYear extends TextSelect{constructor(t){super(t),this.maxYears=30,this.setValues(),this.input.addEventListener("change",this.checkCompletion.bind(this))}setValues(){this.currentYear=(new Date).getFullYear(),this.oldestYear=this.currentYear-this.maxYears,this.optionsUl.innerHTML="",this.optionItems=[];for(let t=1;t<=this.maxYears;t++){const e=createElement("li","text-select__option-item",this.currentYear-t);this.optionsUl.append(e),this.optionItems.push(e)}this.setItemsHandler()}checkCompletion(){const t=parseInt(this.input.value)||0;t>this.currentYear||t<this.oldestYear?(this.isCompleted=!1,this.input.closest(".field__input").classList.add("__uncomplete")):(this.isCompleted=!0,this.input.closest(".field__input").classList.remove("__uncomplete")),super.setCompletedState()}}class TextInputMulti extends TextInput{constructor(t){super(t),this.inputWrapper=t,this.inputWrapper.querySelector("input[type='hidden']")?(this.input=this.inputWrapper.querySelector("input[type='hidden']"),this.name=this.input.name,this.existed=!0):(this.input=createElement("input"),this.input.setAttribute("type","hidden"),this.input.setAttribute("name",t.dataset.name),this.name=this.input.name,this.inputWrapper.append(this.input),this.existed=!1),this.fieldNameBlock=this.inputWrapper.closest(".field").querySelector(".field__name"),this.fieldNameBlock&&(this.ariaLabel=this.fieldNameBlock.textContent),this.inputs=Array.from(this.inputWrapper.querySelectorAll("input[type='text']")),this.inputs.forEach((t=>{t.hasAttribute("data-numbers-only")&&t.addEventListener("input",this.typeNumberOnly.bind(this)),t.addEventListener("input",this.setValue.bind(this)),t.style.textAlign="center"}))}typeNumberOnly(t){super.typeNumberOnly(t)}checkCompletion(){super.checkCompletion()}setValue(t){const e=t.target;let s="";if(this.inputs.forEach((t=>s+=t.value)),this.input.value=s,e.value.length>=e.getAttribute("maxlength")){const t=this.inputs.indexOf(e),s=this.inputs[t+1];s&&s.focus()}}}class TextInputTags extends TextInput{addButton;tags;list;constructor(t){super(t),this.tags=[],this.addButton=this.inputWrapper.querySelector(".field-tags__add-icon"),this.addButton.addEventListener("click",this.addTag.bind(this)),t.addEventListener("keydown",(t=>{13==t.keyCode&&this.addTag()}))}addTag(){this.list||(this.list=createElement("ul","tags-list"));const t=createElement("li","tags-list__item"),e=this.input.value.trim();if(!e||this.tags.find((t=>t.querySelector("input").value===e)))return;this.list.closest("body")||this.inputWrapper.parentNode.append(this.list);const s=createElement("button","tags-list__item-remove icon-close");s.addEventListener("click",(e=>{e.pointerType&&this.removeTag(t)})),t.insertAdjacentHTML("afterbegin",`<input name="${this.name}" type="hidden" disabled value="${e}">`),t.insertAdjacentHTML("afterbegin",`<span class="tags-list__item-text">${e}</span>`),t.append(s),t.setAttribute("title",e),this.list.append(t),this.tags.push(t),this.handleTagItemWidth(t),this.input.value="",this.checkCompletion()}handleTagItemWidth(t){i=i.bind(this);const e=t.querySelector(".tags-list__item-text"),s=t.querySelector(".tags-list__item-remove");function i(){if(!t.closest("body"))return window.removeEventListener("resize",i);this.rootContainer||(this.rootContainer=document.querySelector(".container"));const a=this.rootContainer.clientWidth-s.offsetWidth-10,o=t.cloneNode(!0);o.style.cssText="position: absolute; z-index: -999; opacity: 0",this.rootContainer.append(o),e.textContent=n(e.textContent,o,a,85),t.offsetWidth>a-10&&(t.style.marginRight="0px"),o.remove()}function n(t,e,s,i){let a=t.length>i?t.substring(0,i-3)+"...":t;return e.querySelector(".tags-list__item-text").textContent=a,e.offsetWidth>s?n(a,e,s,i-1):a}window.addEventListener("resize",i),i()}removeTag(t){const e=this.tags.indexOf(t);this.tags.splice(e,1),t.remove(),this.tags.length<1&&this.list.remove()}checkCompletion(){if(!this.input.closest("body"))return this.isCompleted=!0;this.isCompleted=this.tags.length>0,this.setCompletedState()}}class TextInputDate extends TextInputMulti{constructor(t){super(t),this.currentYear=(new Date).getFullYear(),t.addEventListener("change",this.checkCompletion.bind(this)),this.inputs.forEach(((t,e)=>{t.addEventListener("input",this.checkCompletion.bind(this)),t.addEventListener("blur",this.checkCompletion.bind(this)),e==this.inputs.length-1?t.addEventListener("input",this.moveValueToLeft.bind(this)):t.addEventListener("input",this.replaceNextSubvalue.bind(this))})),this.inputsLength=this.inputs.map((t=>{const e=t.getAttribute("maxlength");return t.removeAttribute("maxlength"),{input:t,maxlength:e}}))}setValue(t){const e=t.target;let s="";this.inputs.forEach((t=>s+=t.value)),this.input.value=s;const i=this.inputsLength.find((t=>t.input==e)).maxlength;if(e.value.length>=i){const t=this.inputs.indexOf(e),s=this.inputs[t+1];s&&s.focus()}}moveValueToLeft(t){if(!t.data)return;const e=this.inputs[this.inputs.length-1],s=this.inputsLength[this.inputsLength.length-1].maxlength;if(t.target!==e)return;let i=0,n=0;if(this.inputsLength.forEach((t=>{i+=parseInt(t.maxlength||0);const e=t.input.value.match(/\s/g),s=e?e.length:0;n+=t.input.value.length-s})),n<i&&e.value.length>s){let t="";this.inputs.forEach((e=>{const s=this.inputsLength.find((t=>t.input==e)).maxlength;let i=e.value;if(i.length<s){i.length}t+=i}));const i=s,n=e.selectionStart;e.selectionEnd=n;let a=t.split("").slice(0,t.length-i-1),o=e.value.split(""),r=o.slice(0,n),l=o.slice(n);o=r.concat(l);let h=a.concat(o);const c=new Event("input");this.inputs.map((t=>t)).reverse().forEach((t=>{const e=this.inputsLength.find((e=>e.input==t)).maxlength;t.value=h.slice(-1*e).join(""),h.splice(h.length-e),t.dispatchEvent(c)})),e.focus()}e.value.length>s&&(e.selectionStart-=1,e.selectionEnd=e.selectionStart+1,e.setRangeText(""),e.focus())}replaceNextSubvalue(t){if(!t.data&&"insertFromPaste"!==t.inputType||!t.isTrusted)return;const e=t?t.target:null;if(e){const s=this.inputsLength.find((t=>t.input==e)).maxlength;if("insertFromPaste"===t.inputType){const t=e.value.split("");return t.splice(s),void(e.value=t.join(""))}if(e.value.length>s){const i=t.data.length>s?s:t.data.length;e.selectionEnd=e.selectionStart+i,e.setRangeText(""),e.selectionEnd<s&&e.focus()}e.value.length>s&&(e.selectionStart-=1,e.selectionEnd=e.selectionStart+1,e.setRangeText(""))}}checkCompletion(){this.validate(),this.isCompleted=!!this.isValid,super.setCompletedState()}validate(){const t=this.input.value.split("").filter((t=>parseInt(t)>=0)).join("");if(!parseInt(t))return;const e=Number(t[0]+t[1]),s=Number(t[2]+t[3]),i=Number(t.slice(-4)),n=(new Date).getFullYear(),a=n-i,o=a<10||a>=100;return e<1||e>=32||e>29&&"2"==s||e>30&&("4"==s||"6"==s||"9"==s||"11"==s)||(s<1||s>12)?this.isValid=!1:(this.isValid=!0,{day:e,month:s,year:i,currentYear:n,age:a,invalidYear:o})}}class TextInputBirthDate extends TextInputDate{zodiacSigngs;constructor(t){super(t),this.zodiacSigngs=[{name:"Водолей",startMonth:1,startDay:21,endDay:18,iconName:"aquarius"},{name:"Рыбы",startMonth:2,startDay:19,endDay:20,iconName:"pisces"},{name:"Овен",startMonth:3,startDay:21,endDay:19,iconName:"aries"},{name:"Телец",startMonth:4,startDay:20,endDay:20,iconName:"taurus"},{name:"Близнецы",startMonth:5,startDay:21,endDay:20,iconName:"gemini"},{name:"Рак",startMonth:6,startDay:21,endDay:22,iconName:"cancer"},{name:"Лев",startMonth:7,startDay:23,endDay:22,iconName:"leo"},{name:"Дева",startMonth:8,startDay:23,endDay:22,iconName:"virgo"},{name:"Весы",startMonth:9,startDay:23,endDay:22,iconName:"libra"},{name:"Скорпион",startMonth:10,startDay:23,endDay:21,iconName:"scorpio"},{name:"Стрелец",startMonth:11,startDay:22,endDay:21,iconName:"sagittarius"},{name:"Козерог",startMonth:12,startDay:22,endDay:20,iconName:"capricorn"}],this.uncompletedText=this.input.closest(".field").querySelector(".forms__fields-uncompleted"),this.minYearSpan=this.uncompletedText.querySelector(".birthdate-min-year"),this.maxYearSpan=this.uncompletedText.querySelector(".birthdate-max-year"),this.minYear=this.currentYear-99,this.maxYear=this.currentYear-10,this.minYearSpan.textContent=this.minYear.toString(),this.maxYearSpan.textContent=this.maxYear.toString(),this.existed&&this.checkCompletion()}validate(){const t=super.validate();if(!t)return;if(t.invalidYear)return this.isValid=!1;const e=this.zodiacSigngs.filter((e=>e.startMonth==t.month||e.startMonth+1==t.month)).find(((e,s,i)=>{const n=i[s+1];return!n||(t.day>=e.startDay&&t.day<=n.endDay||(t.day<e.startDay||void 0))})),s=e?e.name:"",i=document.querySelector("input[name='age']"),n=document.querySelector("input[name='zodiac']"),a=new Event("change");if(i&&(i.value=t.age,i.dispatchEvent(a)),n){const t=createElement("span",`zodiac-icon icon-${e.iconName||""}`);n.parentNode.querySelectorAll(".zodiac-icon").forEach((t=>!!t&&t.remove())),n.before(t),n.value=s,n.dispatchEvent(a)}}}class SelectionInput extends Input{selectionField;inputs;input;type;isCompleted;constructor(t){super(t),this.selectionField=t,this.inputs=Array.from(t.querySelectorAll("input")),this.ariaLabel=this.inputs[0].getAttribute("aria-label"),this.type=this.inputs[0].type,this.name=this.inputs[0].name,"checkbox"===this.type&&(this.inputs=Array.from(document.querySelectorAll(`[name=${this.name}]`)),this.inputs.forEach((t=>t.addEventListener("change",(()=>{this.selectionField.dispatchEvent(new Event("change"))}))))),this.selectionField.addEventListener("change",this.checkCompletion.bind(this))}checkCompletion(){this.setInput();const t="checkbox"==this.type?Boolean(this.input.length>0):Boolean(this.input);t?this.selectionField.classList.remove("__uncomplete"):this.selectionField.classList.add("__uncomplete"),this.isCompleted=t}setInput(){"checkbox"===this.type&&(this.input=this.inputs.filter((t=>t.checked))),"radio"===this.type&&(this.input=this.inputs.find((t=>t.checked))||this.inputs[0])}}class CheckEndWorkYear extends SelectionInput{constructor(t){super(t),this.field=this.inputs[0].closest(".field"),this.formsContainer=this.inputs[0].closest(".forms__container"),this.unrequired=Array.from(this.field.querySelectorAll(".endyear-not-checkbox")).reverse(),this.otherCheckboxes=Array.from(this.formsContainer.querySelectorAll(".endyear-checkbox")),this.checkCompletion(),t.addEventListener("change",this.onChange.bind(this))}checkCompletion(){this.isCompleted=!0}onChange(){this.inputs[0].checked?(this.unrequired=this.unrequired.map((t=>{if(t)return t.remove(),t.cloneNode(!0)})),this.formsContainer.querySelectorAll(".endyear-checkbox").forEach((t=>{this.inputs[0].closest(".checkbox")!==t&&(t.style.display="none")}))):this.unrequired.forEach((t=>{t&&!t.closest("body")&&this.inputs[0].parentNode.after(t),this.formsContainer.querySelectorAll(".endyear-checkbox").forEach((t=>t.style.removeProperty("display")))}))}}class Select extends SelectionInput{selectionField;inputs;isShown;constructor(t){super(t),this.selectionField=t,this.value=t.querySelector(".select__value"),this.inputs=Array.from(t.querySelectorAll("input[type='radio']")),this.isShown=this.selectionField.classList.contains("__shown"),this.toggle=this.toggle.bind(this),this.closeByDocument=this.closeByDocument.bind(this),this.setValues(),this.initOptions(),this.selectionField.addEventListener("click",this.toggle),document.addEventListener("click",this.closeByDocument)}closeByDocument(t){t.target!==this.selectionField&&t.target!==this.value&&this.isShown&&this.hide()}setValues(){this.inputs.forEach((t=>{const e=t.parentNode,s=t.value;e.textContent.includes(s)||e.insertAdjacentHTML("beforeend",s)}))}initOptions(){this.inputs.forEach((t=>{t.addEventListener("change",(()=>{this.value.textContent=t.value}))}))}toggle(){this.selectionField.classList.contains("__shown")?this.hide():this.show()}show(){this.isShown=!0,this.selectionField.classList.add("__shown")}hide(){this.isShown=!1,this.selectionField.classList.remove("__shown")}onDestroy(){this.selectionField.removeEventListener("click",this.toggle),document.removeEventListener("click",this.closeByDocument)}}class SelectChildren extends Select{constructor(t){super(t),this.addButton=this.fieldGroup.querySelector(".add-field"),this.addButton&&(this.addButton.style.display="none"),this.formsContainer=this.fieldGroup.closest(".forms__container"),this.inputs.forEach((t=>{t.addEventListener("change",(()=>this.onChange(t)))})),this.fieldGroup.addEventListener("change",(()=>this.checkCompletion())),this.addButton.addEventListener("click",this.onBtnClick.bind(this))}onBtnClick(t){t.preventDefault();this.formsContainer.querySelectorAll(".children-group").forEach((t=>t.addEventListener("change",this.checkCompletion.bind(this))))}onChange(t){if(this.addButton&&("Есть"===t.value&&this.addButton.style.removeProperty("display"),"Нет"===t.value)){this.addButton.style.display="none";const t=Array.from(this.formsContainer.querySelectorAll(".children-group"));t&&t.forEach((t=>t.remove()))}}checkCompletion(){const t=this.inputs.find((t=>t.checked));if(t&&"Есть"===t.value){const t=Array.from(this.formsContainer.querySelectorAll(".children-group"));if(t.length>0){let e=!0;for(let s of t)if(!s.querySelector("input:checked"))return e=!1;if(this.isCompleted=e,e){const t=this.selectionField.closest(".__uncomplete");this.selectionField.classList.remove("__uncomplete"),t&&t.classList.remove("__uncomplete")}}else this.isCompleted=!1}else super.checkCompletion()}}class Range{rangeBlock;range;rangeSubscales;rangeScale;rangeData;toggler;valueInput;value;name;valueInput;constructor(t){t.querySelector("[data-range-limits]")&&(this.rangeBlock=t,this.range=t.querySelector(".range"),this.rangeScale=t.querySelector(".range__scale"),this.toggler=t.querySelector(".range__toggler"),this.valueInput=t.querySelector(".range-block__value"),this.name=this.valueInput.name,this.toggler.style.transform="translate(-50%, 0)",this.getData(),window.addEventListener("resize",this.getData.bind(this)),this.setTogglerHandlers(),this.setFocusHandler(),this.valueInput.addEventListener("change",this.checkInputValue.bind(this)),this.setValue(this.rangeData.minValue))}getData(){this.rangeData||(this.rangeSubscales=Array.from(this.rangeBlock.querySelectorAll(".range__subscale")).map((t=>{const e=t.dataset.rangeLimits.split(", "),s=parseInt(t.dataset.rangeStep);if(e.length<2)throw new Error("Неверно указаны значения data-range-limits в range");const i=parseInt(e[0]),n=parseInt(e[1]);return t.remove(),{step:s,minValue:i,maxValue:n||i}})));const t=this.range.offsetWidth-this.toggler.offsetWidth/1.2,e=this.rangeSubscales[0].minValue,s=this.rangeSubscales[this.rangeSubscales.length-1].maxValue,i=s-e;this.rangeData={width:t,minValue:e,maxValue:s,totalValue:i,step:i/t},this.setValue(this.rangeData.minValue),this.toggler.style.transform="translate(-50%, 0)",this.moveToggler(0)}setTogglerHandlers(){a=a.bind(this),o=o.bind(this);const t=this.toggler,e=this.range,s=this.rangeData.width;let i=getCoords(this.range).left+t.offsetWidth/2;function n(e){if(e.preventDefault(),i=getCoords(this.range).left+t.offsetWidth/2,e.target===t)document.addEventListener("pointermove",a),document.addEventListener("pointerup",o),t.classList.add("__moving");else{const n=e.clientX-i;n>=0&&n<=s&&(t.style.left=`${n}px`,t.dispatchEvent(new Event("pointerdown")))}}function a(t){let e=t.clientX-i;e<0?e=0:e>s&&(e=s);let n=Math.round(this.rangeData.step*e)+this.rangeData.minValue;const a=this.rangeSubscales.find((t=>n>=t.minValue&&n<=t.maxValue)).step,o=parseInt(n/a);n=o*a-this.rangeData.minValue,e=n/this.rangeData.step,this.moveToggler(e),this.valueInput.value=Math.round(this.rangeData.step*e)+this.rangeData.minValue,this.valueInput.dispatchEvent(new Event("change"))}function o(){document.removeEventListener("pointermove",a),document.removeEventListener("pointerup",o),t.classList.remove("__moving")}t.addEventListener("pointerdown",n.bind(this)),e.addEventListener("pointerdown",n.bind(this)),t.ondragstart=()=>!1,e.ondragstart=()=>!1,this.rangeScale.style.width=getComputedStyle(t).left}checkInputValue(t){const e=this.valueInput;let s=parseInt(e.value.replace(/\D/g,""));if(s>this.rangeData.maxValue&&(s=this.rangeData.maxValue),s<this.rangeData.minValue&&(s=this.rangeData.minValue),e.value=s.toLocaleString()+" рублей",t.isTrusted){const t=(s-this.rangeData.minValue)/this.rangeData.step;this.moveToggler(t)}}setValue(t){this.valueInput.value=t,this.valueInput.dispatchEvent(new Event("change"))}moveToggler(t){this.toggler.style.left=`${t}px`,this.rangeScale.style.width=`${t}px`,this.togglerLeft=t;const e=parseInt(t);0===e&&(this.toggler.style.cssText+="transform: translate(-50%, 0%)"),e>=parseInt(this.rangeData.width)&&(this.toggler.style.cssText+="transform: translate(50%, 0%)",this.rangeScale.style.width=`${t+this.toggler.offsetWidth}px`),0!==e&&e!==parseInt(this.rangeData.width)&&this.toggler.style.removeProperty("transform")}setFocusHandler(){this.rangeBlock.addEventListener("click",(()=>this.valueInput.focus())),this.valueInput.addEventListener("focus",(()=>this.rangeBlock.classList.add("__focus"))),this.valueInput.addEventListener("blur",(()=>this.rangeBlock.classList.remove("__focus")))}}class LoadImage{constructor(t){this.imageBlock=t,this.input=t.querySelector("input[type='file']"),this.loadButton=t.querySelector(".load-image__button"),this.contentBlock=t.querySelector(".load-image__content"),this.img=t.querySelector("#load-image__preview"),this.cutSquare=t.querySelector(".cut-square"),this.cutCircle=t.querySelector(".cut-circle"),this.closeButton=t.querySelector(".load-image__close"),this.format=t.querySelector("#load-image__format"),this.size=t.querySelector("#load-image__size"),this.resolution=t.querySelector("#load-image__resolution"),this.info=t.querySelector(".load-image__info"),this.format.addEventListener("change",this.onInputChange.bind(this)),this.size.addEventListener("change",this.onInputChange.bind(this)),this.resolution.addEventListener("change",this.onInputChange.bind(this)),this.cutSquareParams=new CutImage(this.cutSquare,85),this.cutCircleParams=new CutImage(this.cutCircle,85,!0),this.img.addEventListener("click",(()=>modal.createImageModal(this.img.src))),this.info.classList.add("__removed"),this.input.addEventListener("change",this.loadImage.bind(this)),this.closeButton.addEventListener("click",this.remove.bind(this)),this.hideContent()}onInputChange(t){const e=t.target,s=e.value;e.style.width=s.length/1.5+"em"}loadImage(){const t=this.input.files[0],e=new FileReader;t&&(e.readAsDataURL(t),e.onload=()=>{const s=e.result;this.img.src=s;const i=new Image;i.src=s,i.onload=()=>{this.setImgDataValues(t,i),this.origSizes={width:i.width,height:i.height},this.checkCompletion(),this.showContent(),this.cutSquareParams.init(i),this.cutCircleParams.init(i)}})}hideContent(){this.contentBlock.classList.add("__removed"),this.loadButton.classList.remove("__removed"),this.info.classList.add("__removed")}showContent(){this.contentBlock.classList.remove("__removed"),this.loadButton.classList.add("__removed"),this.info.classList.remove("__removed")}remove(){this.input.value="",this.hideContent(),this.checkCompletion()}setImgDataValues(t,e){const s=new Event("change"),i=t.name.split(".");this.format.value=i[i.length-1],this.format.dispatchEvent(s),this.size.value=calcSize(t.size),this.size.dispatchEvent(s),this.resolution.value=e.naturalWidth.toString()+"x"+e.naturalHeight.toString(),this.resolution.dispatchEvent(s)}checkCompletion(){this.input.files[0]?(this.isCompleted=!0,this.imageBlock.classList.remove("__uncomplete")):(this.isCompleted=!1,this.imageBlock.classList.add("__uncomplete"))}}class CutImage{constructor(t,e,s=!1){this.block=t,this.isCircle=s,this.previewSize=e,this.img=t.querySelector(".load-image__small-img"),this.scaleModalCoef=5,this.cutButton=t.querySelector(".load-image__apply-edit"),this.refreshButton=t.querySelector(".load-image__refresh-edit"),this.downloadButton=t.querySelector(".load-image__download-edit"),this.moveXButtonsBlock=t.querySelector(".load-image__move-x-buttons"),this.moveYButtonsBlock=t.querySelector(".load-image__move-y-buttons"),this.scaleButtonsBlock=t.querySelector(".load-image__scale-buttons"),this.initDataTexts(),this.img.ondragstart=()=>!1,this.img.addEventListener("pointerdown",(t=>{const e=t=>{t.clientX!==s&&t.clientY!==i||this.createFullSize(!0),this.img.removeEventListener("pointerup",e)};this.onPointerdown(t);const s=t.clientX,i=t.clientY;this.img.addEventListener("pointerup",e)})),this.cutButton.addEventListener("click",(t=>{t.preventDefault(),this.cut()})),this.refreshButton.addEventListener("click",(t=>{t.preventDefault(),this.refresh()})),this.downloadButton.addEventListener("click",(t=>{t.preventDefault(),this.downloadCut()})),this.downloadButton.classList.add("__removed"),this.scaleButtonsBlock&&this.moveYButtonsBlock&&this.moveXButtonsBlock&&this.initControlsButtons()}initDataTexts(t=null,e=null,s=null){this.datablock=this.block.querySelector(".load-image__small-data"),this.datablock&&(this.format=this.datablock.querySelector(".load-image__small-data-format"),this.size=this.datablock.querySelector(".load-image__small-data-size"),this.resolution=this.datablock.querySelector(".load-image__small-data-resolution"),t||e||s?(this.toggleDetails("show"),this.format.textContent=t,this.size.textContent=e,this.resolution.textContent=s):this.toggleDetails("hide"))}toggleDetails(t="hide"){this.datablock&&("hide"===t&&this.datablock.classList.add("__removed"),"show"===t&&this.datablock.classList.remove("__removed"))}downloadCut(){i=i.bind(this),e=e.bind(this);modal.createBasicModal("Скачать изображение",'\n            <div class="radiobuttons">\n                <label class="radiobuttons__item">\n                    <input type="radio" name="modal-window_download-type" value="origin" class="radiobuttons__input">\n                    <svg width="20" height="20" viewBox="0 0 23 23">\n                        <circle cx="10" cy="10" r="9"></circle>\n                        <path\n                            d="M10,7 C8.34314575,7 7,8.34314575 7,10 C7,11.6568542 8.34314575,13 10,13 C11.6568542,13 13,11.6568542 13,10 C13,8.34314575 11.6568542,7 10,7 Z"\n                            class="radiobuttons__item-inner"></path>\n                        <path\n                            d="M10,1 L10,1 L10,1 C14.9705627,1 19,5.02943725 19,10 L19,10 L19,10 C19,14.9705627 14.9705627,19 10,19 L10,19 L10,19 C5.02943725,19 1,14.9705627 1,10 L1,10 L1,10 C1,5.02943725 5.02943725,1 10,1 L10,1 Z"\n                            class="radiobuttons__item-outer"></path>\n                    </svg>\n                    Сохранить оригинальный размер\n                </label>\n                <label class="radiobuttons__item">\n                    <input type="radio" name="modal-window_download-type" value="cut" class="radiobuttons__input">\n                    <svg width="20" height="20" viewBox="0 0 23 23">\n                        <circle cx="10" cy="10" r="9"></circle>\n                        <path\n                            d="M10,7 C8.34314575,7 7,8.34314575 7,10 C7,11.6568542 8.34314575,13 10,13 C11.6568542,13 13,11.6568542 13,10 C13,8.34314575 11.6568542,7 10,7 Z"\n                            class="radiobuttons__item-inner"></path>\n                        <path\n                            d="M10,1 L10,1 L10,1 C14.9705627,1 19,5.02943725 19,10 L19,10 L19,10 C19,14.9705627 14.9705627,19 10,19 L10,19 L10,19 C5.02943725,19 1,14.9705627 1,10 L1,10 L1,10 C1,5.02943725 5.02943725,1 10,1 L10,1 Z"\n                            class="radiobuttons__item-outer"></path>\n                    </svg>\n                    Сохранить уменьшенный размер\n                </label>\n            </div>\n        ',{text:"Скачать",confirmCallback:e},"Отмена");const t=modal.getModalBody();function e(){const e=Array.from(t.querySelectorAll("input[name='modal-window_download-type']")).find((t=>t.checked))||{value:"cut"},n=this.createFullSize(),a={width:this.origSizes.width,height:this.origSizes.height};let o;switch("origin"!==e.value&&"both"!==e.value||(o=s.call(this)),e.value){case"origin":i(o,a);break;case"cut":i(n.src,n)}}function s(){const t=createElement("canvas");t.width=this.origSizes.width,t.height=this.origSizes.height,t.style.cssText="position: absolute; z-index: -999;";return t.getContext("2d").drawImage(this.origImg,0,0),t.toDataURL("image/png")}function i(t,e=this.createFullSize()){let s=localStorage.getItem("job1_users_downloads");s||(localStorage.setItem("job1_users_downloads",{}),s=localStorage.getItem("job1_users_downloads"));const i=function(){const t=document.querySelector("input[name='name']").value||"Имя",e=document.querySelector("input[name='surname']").value||"Фамилия",s=document.querySelector("input[name='patronymic']").value||"";return s?`${t}-${e}-${s}`:`${t}-${e}`}(),n=s[i]||1,a=`\n                ${i}_${e.width}x${e.height}_000000000${n}\n            `.trim(),o=createElement("a");o.download=a,o.href=t,o.click(),s[i]=n+1,localStorage.setItem("job1_users_downloads",s)}t.classList.add("modal__body--small")}init(t){this.origImg=t,this.origSizes={width:t.width,height:t.height},this.img.src=t.src,this.setImg(t.width,t.height),this.cutButton.classList.add("__removed"),this.refresh()}setImg(t,e){if(t!==e){let s=t/e*this.previewSize,i=this.previewSize;if(s<85){const t=this.previewSize/s;s*=t,i*=t}if(i<85){const t=this.previewSize/i;s*=t,i*=t}this.img.width=s,this.img.height=i}else t===e&&(this.img.width=this.img.height=this.previewSize);this.origSizesScaled={width:this.img.width,height:this.img.height},this.movedX=0,this.movedY=0,this.scaled=1,this.setTransform()}setTransform(){this.cutButton.classList.remove("__removed"),this.img.style.transform=`translate(${this.movedX||0}px, ${this.movedY||0}px)`,this.img.width=this.origSizesScaled.width*this.scaled,this.img.height=this.origSizesScaled.height*this.scaled}cut(){this.cutButton.classList.add("__removed"),this.scaleMin=this.scaled,this.lastCutWidth=this.img.width,this.lastCutHeight=this.img.height,this.fixatedX=Math.abs(this.movedX),this.fixatedY=Math.abs(this.movedY),this.downloadButton.classList.remove("__removed");const t=this.createFullSize(!1),e=calcSize(t.src.length),s=`${t.width}x${t.height}`;this.initDataTexts(t.format,e,s)}refresh(){this.scaleMin=1,this.scaled=1,this.movedY=0,this.movedX=0,this.setTransform(),this.lastCutWidth=0,this.lastCutHeight=0,this.fixatedX=100,this.fixatedY=100,this.scaleModal=this.scaleModalCoef/this.scaled,this.downloadButton.classList.add("__removed"),this.toggleDetails("hide")}initControlsButtons(){const t=this.moveXButtonsBlock.querySelectorAll("[class*='move-x-']"),e=this.moveYButtonsBlock.querySelectorAll("[class*='move-y-']"),s=this.scaleButtonsBlock.querySelectorAll("[class*='scale-']");t.forEach((t=>t.addEventListener("click",this.moveX.bind(this)))),e.forEach((t=>t.addEventListener("click",this.moveY.bind(this)))),s.forEach((t=>t.addEventListener("click",this.scale.bind(this))))}moveX(t){const e=t.target;e.classList.contains("move-x-right")&&this.moveTo("X","-",5),e.classList.contains("move-x-left")&&this.moveTo("X","+",5)}moveY(t){const e=t.target;e.classList.contains("move-y-bottom")&&this.moveTo("Y","-",5),e.classList.contains("move-y-top")&&this.moveTo("Y","+",5)}scale(t){const e=t.target;if(this.scaleMin||(this.scaleMin=1),e.classList.contains("scale-minus")){if(!(this.scaled-.1>=this.scaleMin))return;this.scaled-=.1,this.movedY=this.movedX=0,this.fixatedX=100,this.fixatedY=100,this.lastCutWidth=0,this.lastCutHeight=0}e.classList.contains("scale-plus")&&this.scaled+.1<=5&&(this.scaled+=.1),this.scaleModal=this.scaleModalCoef/this.scaled,this.setTransform()}onPointerdown(t){let e=t.clientX,s=t.clientY;const i=t=>{let i=t.clientX,n=t.clientY;i>e&&this.moveTo("X","+"),i<e&&this.moveTo("X","-"),n>s&&this.moveTo("Y","+"),n<s&&this.moveTo("Y","-"),e=i,s=n},n=()=>{document.removeEventListener("pointermove",i),document.removeEventListener("pointerup",n)};document.addEventListener("pointermove",i),document.addEventListener("pointerup",n)}moveTo(t,e,s=1){const i=getCoords(this.img),n=getCoords(this.img.parentNode);let a=this[`moved${t}`];const o=this.img.width-this.lastCutWidth,r=this.img.height-this.lastCutHeight;switch(e){case"+":a+=s;break;case"-":a-=s}if("-"===e&&(s*=-1),"Y"===t){const e=i.top+s<=n.top&&i.bottom+s>=n.bottom,o=a<=this.fixatedY+r&&a>=this.fixatedY-r;e&&o&&(this[`moved${t}`]=a)}if("X"===t){const e=i.left+s<=n.left&&i.right+s>=n.right,r=a<=this.fixatedX+o&&a>=this.fixatedX-o;e&&r&&(this[`moved${t}`]=a)}this.setTransform()}createFullSize(t=!1){const e=getCoords(this.img),s=getCoords(this.img.parentNode),i=createElement("canvas");i.width=document.documentElement.clientWidth||window.innerWidth,i.height=document.documentElement.clientHeight||window.innerHeight,i.style.cssText="position: absolute; z-index: -99; opacity: 0",document.body.append(i);i.getContext("2d").drawImage(this.origImg,0,0,this.img.width*this.scaleModal,this.img.height*this.scaleModal);const n=this.previewSize*this.scaleModal,a=createElement("canvas");a.width=this.previewSize*this.scaleModal,a.height=this.previewSize*this.scaleModal,a.style.cssText="position: absolute; z-index: -99; opacity: 0",document.body.append(a);const o=a.getContext("2d"),r=(s.left-e.left)*this.scaleModal,l=(s.top-e.top)*this.scaleModal;if(this.isCircle){const t=a.width/2,e=a.height/2,s=Math.min(t,e);o.beginPath(),o.arc(t,e,s,0,2*Math.PI),o.closePath(),o.fill(),o.globalCompositeOperation="source-in",o.drawImage(i,r,l,n,n,0,0,n,n)}else o.drawImage(i,r,l,n,n,0,0,n,n);const h=a.toDataURL("image/png");return t&&modal.createImageModal(h),i.remove(),a.remove(),{src:h,width:a.width,height:a.height,format:"PNG"}}}class Form{constructor(t){this.submit=this.submit.bind(this),this.form=t,this.formSelector="."+this.form.className.split(" ")[0],this.submitButton=this.form.querySelector(".forms__submit"),this.form.addEventListener("submit",this.submit);new MutationObserver((t=>{forms_doInit()})).observe(this.form,{childList:!0})}submit(t){const e=inputParams.filter((t=>{let e=!1;return t.input&&t.input.closest&&(e=t.input.closest(this.formSelector)===this.form),!e&&t.inputs&&t.inputs.forEach((t=>{t&&t.closest&&(e=t.closest(this.formSelector)===this.form)})),e})),s=[];e.forEach((t=>{t.checkCompletion(),t.isCompleted||s.push(t)})),s.length>0?t.preventDefault():(t.preventDefault(),window.location.href=window.location.origin+"/profile/forms/send.html")}}const form=new Form(document.querySelector(".forms"));class CreateModalLink{constructor(t){this.link=t,t.addEventListener("click",this.onClick.bind(this))}onClick(t){if(t.preventDefault(),"conditions-link"===t.target.getAttribute("id")){const t="Условия направления физическими лицами заявлений в электронном виде в информационно-телекоммуникационной сети «Интернет» на сайте Job1.ru",e='\n            <div class="agreement__content">\n                <h3 class="agreement__statement">\n                    Гражданин Российской Федерации <span class="bold">(далее – «Заявитель»)</span>, сайт Job1.ru\n                    <span class="bold">(далее – «Сайт»)</span>\n                    заявление в электронном виде на сайте <span class="bold">(далее – «Заявление»)</span> в\n                    целях получения услуги Сайта,\n                    тем самым понимает, принимает и подтверждает следующее:\n                </h3>\n                <ol class="agreement-list__primary">\n                    <li class="agreement-list__primary-item">\n                        Заявитель подтверждает, что все указанные в Заявлении персональные данные принадлежат\n                        лично Заявителю.\n                    </li>\n                    <li class="agreement-list__primary-item">\n                        Заявитель подтверждает, что он является совершеннолетним гражданином Российской\n                        Федерации, имеет законное право на предоставление Сайту данных, указанных в Заявлении, и\n                        такие данные являются полными и действительными на момент их предоставления Сайту.\n                    </li>\n                    <li class="agreement-list__primary-item">\n                        Заявитель обязуется <span class="underlined">не совершать</span> следующие действия:\n                        <ul class="agreement-list__secondary">\n                            <li class="agreement-list__secondary-item">\n                                Любым способом посредством сайта <a href="https://job1.ru/">https://job1.ru/</a>\n                                размещать, распространять, сохранять, загружать и/или уничтожать материалы\n                                (информацию) в нарушение законодательства Российской Федерации;\n                            </li>\n                            <li class="agreement-list__secondary-item">\n                                Размещать заведомо недостоверную информацию, регистрироваться, используя чужие\n                                персональные данные (персональные данные третьих лиц, а также вымышленных лиц);\n                            </li>\n                            <li class="agreement-list__secondary-item">\n                                Размещать заведомо недостоверную информацию об адресе\n                                фактического проживания, номере(-ах) телефона(-ов), размещать информацию об\n                                адресах электронной почты, права на использование которых отсутствуют у\n                                Заявителя.\n                            </li>\n                        </ul>\n                    </li>\n                    <li class="agreement-list__primary-item">\n                        Заявитель обязуется не нарушать информационную безопасность электронных ресурсов Сайта, не нарушать процедуры регистрации, предусмотренные Сайтом.\n                    </li>\n                    <li class="agreement-list__primary-item">\n                        Сайт прилагает все возможные усилия и предусмотренные законодательством Российской\n                        Федерации меры для того, чтобы избежать несанкционированного использования персональной\n                        информации Заявителя. Заявитель уведомлен и соглашается с тем, что Сайт не несет\n                        ответственности за возможное нецелевое использование персональной информации\n                        пользователей, произошедшее из-за технических неполадок в программном обеспечении,\n                        серверах, компьютерных сетях, находящихся вне контроля Сайта, или в результате\n                        противоправных действий третьих лиц..\n                    </li>\n                    <li class="agreement-list__primary-item">\n                        Заявитель выражает согласие и уполномочивает Сайт предоставлять полностью или\n                        частично персональные данные работодателю (организациям и индивидуальным\n                        предпринимателям) в целях получения от последнего предложение работы.\n                    </li>\n                </ol>\n            </div>\n            ';modal.createBasicModal(t,e),modal.getTitle().classList.add("modal__title--agreement")}if("data-processing-link"===t.target.getAttribute("id")){const t="Согласие на обработку персональных данных, применяемое при направлении заявлений в электронном виде в информационно-телекоммуникационной сети «Интернет» на сайте Job1.ru в целях получения услуг (далее – «Согласие»)",e='<div class="agreement__content">\n                <p class="agreement__statement">\n                Я, <span class="bold">(далее – «Заявитель»)</span>, свободно, своей волей и в своем интересе\n                даю конкретное,\n                информированное и сознательное согласие сайту job1.ru <span class="bold">(далее -\n                    «Сайт»)</span> на обработку\n                информации, относящейся к моим персональным данным, в том числе: Ф.И.О.; год, месяц, дата; гражданство; пол; адрес: места жительства (только название улицы и номер дома); сведения об образовании, профессии, специальности и квалификации; сведения о занимаемых ранее должностях и стаже работы, места работы; семейное положение; наличие детей; сведения о смене фамилии; фотография; иная, ранее предоставленная Сайту информация; сведения о номерах телефонов, абонентом и/или пользователем которых я являюсь; сведения об адресах электронной почты Заявителя, имени пользователя Заявителя в сети Интернет, данные о созданном на сайте Сайта; метаданные, данные cookie-файлов, cookie-идентификаторы, IP-адреса, сведения о браузере и операционной системе; сведения, полученные от третьих лиц, в том числе государственных органов, государственных информационных систем, единой системы идентификации и аутентификации (ЕСИА), Пенсионного фонда Российской Федерации, в том числе через систему межведомственного электронного взаимодействия (СМЭВ), и/или из сети Интернет, и/или из иных общедоступных источников персональных данных и любую иную информацию, представленную Сайту.\n                </p>\n                <p class="agreement__statement">\n                    Обработка персональных данных может осуществляться с использованием средств автоматизации или без таковых, а также путем смешанной обработки персональных данных, включая сбор, запись, систематизацию, накопление, хранение, уточнение (обновление, изменение), извлечение, использование, передачу (предоставление, доступ), обезличивание, блокирование, удаление, уничтожение персональных данных, в том числе в информационных системах Сайту, и совершение иных действий, предусмотренных Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных».\n                </p>\n                <p class="agreement__statement">\n                    Я даю согласие на обработку своих персональных данных в следующих целях:\n                </p>\n                <ul class="agreement-list__primary">\n                    <li\n                        class="agreement-list__primary-item agreement-list__primary-item--long">\n                        предоставления доступа к моим персональным данным и передача моих персональных данных работодателям и кадровым агентствам в целях потенциального трудоустройства;\n                    </li>\n                    <li class="agreement-list__primary-item agreement-list__primary-item--long">\n                        добавление моих персональных данных в базы данных резюме на Сайтее\n                    </li>\n                </ul>\n                <p class="agreement__statement">\n                    В вышеуказанных целях я согласен на поручение обработки моих контактных данных контрагентам Сайта с обязательным условием соблюдения конфиденциальности таких данных.\n                </p>\n                <p class="agreement__statement">\n                    Банк осуществляет обработку персональных данных Заявителя в течение 3 (трех) лет со дня подачи настоящего Согласия. \n                </p>\n                <p class="agreement__statement">\n                    Согласие может быть отозвано субъектом персональных данных путем обращения в отделение Банка с заявлением, оформленным в письменной форме.\n                </p>\n                <p class="agreement__statement">\n                    Настоящее Согласие признается мной и Сайтом моим письменным согласием на обработку моих персональных данных, согласно ст. 9 Федерального закона от 27.07.2006 г. №152-ФЗ «О персональных данных».\n                </p>\n                <p class="agreement__statement">\n                    Согласие может быть отозвано субъектом персональных данных путем направления в job1.ru письменного отзыва по адресу электронной почты: <a href="mailto: support@job1.ru">support@job1.ru</a> . В соответствии с п. 12 ст. 10.1 Федерального закона от 27.07.2006 г. № 152-ФЗ «О персональных данных» требование должно включать в себя фамилию, имя, отчество (при наличии), контактную информацию (номер телефона, адрес электронной почты или почтовый адрес), а также перечень персональных данных, обработка которых подлежит прекращению.\n                </p>\n            </div>';modal.createBasicModal(t,e),modal.getTitle().classList.add("modal__title--agreement")}}}let inputParams=[];const groupsParams=[],forms_inputSelectors=[{selector:".add-field",classInstance:AddFields},{selector:"[data-add-group-checkbox]",classInstance:AddFieldsCheckbox},{selector:".field__input[type='text']:not([class*='field-init'])",classInstance:TextInput},{selector:".field__input-multi:not([class*='field-init'])",classInstance:TextInputMulti},{selector:".field__input-multi.field-init--date",classInstance:TextInputDate},{selector:".field__input-multi.field-init--birthdate",classInstance:TextInputBirthDate},{selector:".field-tags__input",classInstance:TextInputTags},{selector:".text-select__input:not([class*='field-init'])",classInstance:TextSelect},{selector:".field-init--workyear",classInstance:TextSelectWorkYear},{selector:".field__selection",classInstance:SelectionInput},{selector:".select:not([class*='field-init'])",classInstance:Select},{selector:".field-init--select-children",classInstance:SelectChildren},{selector:".checkbox:not([class*='field-init'])",classInstance:SelectionInput},{selector:".field-init--check-end-workyear",classInstance:CheckEndWorkYear},{selector:".load-image",classInstance:LoadImage},{selector:".range-block",classInstance:Range},{selector:".create-modal-link",classInstance:CreateModalLink}];function forms_doInit(){setTimeout((()=>{inputParams=inputParams.filter((t=>{let e=!1;return forms_observingNodesKeys.forEach((s=>{t[s]&&t[s].closest&&t[s].closest("body")&&(e=!0)})),e})),forms_inputSelectors.forEach((t=>{Array.from(document.querySelectorAll(t.selector)).forEach((e=>{inputParams.find((t=>{let s=!1;return forms_observingNodesKeys.forEach((i=>{t[i]===e&&(s=!0)})),s}))||inputParams.push(new t.classInstance(e))}))})),Array.from(document.querySelectorAll(".forms__fields-group")).forEach((t=>{groupsParams.find((e=>!!e&&Object.values(e).includes(t)))||groupsParams.push(new InputGroup(t,inputParams))}))}),0)}function observeDocumentBodyOnInputs(){new MutationObserver((t=>{t.find((t=>t.target.classList.contains("text-select__options")))||setTimeout((()=>forms_doInit()),0)})).observe(document.body,{childList:!0,subtree:!0})}forms_doInit(),observeDocumentBodyOnInputs();
+/* !Эти скрипты предназначены только для страницы profile/forms/index.html! */
+
+// список ключей, значения которых в классах, содержащихся в массивах inittedInputs, являются DOM-элементами, обязательными для присутствия на странице. Массив используется в forms_observeNodeBeforeInit().
+const forms_observingNodesKeys = [
+    "input", "button", "checkbox", "selectionField", "link", "inputWrapper", "rangeBlock", "imageBlock"
+];
+
+// кнопки add-field--education, которым подбирается одинаковая высота
+function justifyAddButtonsHeight() {
+    doJustify();
+    window.addEventListener("resize", doJustify);
+
+    function doJustify() {
+        const selectors = [".add-field--education"];
+        selectors.forEach(selector => {
+            const buttons = Array.from(document.querySelectorAll(selector));
+            buttons.forEach(btn => btn.style.removeProperty("min-height"));
+            const heights = buttons.map(btn => btn.offsetHeight);
+            const maxHeight = Math.max(...heights);
+            buttons.forEach(btn => btn.style.minHeight = `${maxHeight}px`);
+        });
+    }
+}
+justifyAddButtonsHeight();
+
+// обязательно должен быть инициализирован ДО остальных классов
+class AddFields {
+    constructor(button) {
+        this.button = button;
+        this.container = button.closest(".forms__container");
+        this.maxFields = parseInt(button.dataset.addMax) || 100;
+        this.showAmount = parseInt(button.dataset.addShow) || 0;
+        this.removeButton = createElement("button", "add-field__remove");
+        this.fields = [];
+        button.removeAttribute("data-add-max");
+        button.removeAttribute("data-add-show");
+        this.title = this.container.querySelector(".add-field__title");
+        this.groups = Array.from(this.container.querySelectorAll("[data-add-group]"));
+        this.fieldsAmount = 0;
+
+        this.askConfirmation = this.askConfirmation.bind(this);
+        this.groups.forEach(gr => gr.remove());
+        button.addEventListener("click", () => this.addField());
+        if (this.showAmount) {
+            for (let i = 0; i < this.showAmount; i++) this.addField();
+        }
+    }
+    addField() {
+        if (this.fieldsAmount + 1 > this.maxFields) return;
+
+        this.fieldsAmount++;
+        const groups = this.groups.map(el => el.cloneNode(true));
+        this.fields.push(groups);
+        groups.forEach(group => this.addGroup(group));
+
+        // добавить кнопку удаления блока
+        if (this.fieldsAmount > this.showAmount) {
+            const button = createElement("button", "add-field__remove-button icon-bin", "Удалить блок");
+            button.setAttribute("title", "Удалить блок");
+            groups[groups.length - 1].before(button);
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                this.askConfirmation(groups, button);
+            });
+        }
+
+        this.container.append(this.button);
+        if (this.fieldsAmount >= this.maxFields) this.button.remove();
+    }
+    addGroup(group) {
+        if (group.dataset.addGroup) {
+            const skipAmount = parseInt(group.dataset.addGroup.split(":")[1]);
+            if (skipAmount) {
+                if (this.fieldsAmount <= skipAmount && skipAmount > 0) return;
+                if (skipAmount < 0 && this.fieldsAmount > Math.abs(skipAmount)) return;
+            };
+        }
+        const suffix = `_${this.fieldsAmount}`;
+        group.removeAttribute("data-add-group");
+        const inputs = Array.from(group.querySelectorAll("input"));
+        const labels = Array.from(group.querySelectorAll("label"));
+        labels.forEach(label => {
+            const labelFor = label.getAttribute("for");
+            if (labelFor) label.setAttribute("for", labelFor + suffix);
+        });
+        inputs.forEach(inp => {
+            const id = inp.getAttribute("id");
+            const name = inp.getAttribute("name");
+
+            if (id) inp.setAttribute("id", id + suffix);
+            if (name) inp.setAttribute("name", name + suffix);
+        });
+
+        this.container.append(group);
+    }
+    askConfirmation(groups, button) {
+        confirmCallback = confirmCallback.bind(this);
+        modal.createBasicModal(
+            "Удалить блок?",
+            "Будет удален выбранный блок",
+            { text: "Удалить", confirmCallback },
+            "Не удалять");
+        modal.getModalBody().classList.add("modal__body--small");
+
+        function confirmCallback() {
+            button.remove();
+            this.removeField(groups);
+        }
+    }
+    removeField(field) {
+        const index = this.fields.findIndex(f => f === field);
+        if (index >= 0) {
+            const field = this.fields[index];
+            field.forEach(group => group.remove());
+            this.fields.splice(index, 1);
+            this.fieldsAmount--;
+        }
+        if (this.fieldsAmount < this.maxFields) this.container.append(this.button);
+    }
+}
+class AddFieldsCheckbox {
+    constructor(cb) {
+        this.checkbox = cb;
+        this.addGroupName = cb.dataset.addGroupCheckbox;
+        this.group = cb.closest(".forms__fields-group");
+        this.addFields = Array.from(this.group.querySelectorAll(`[data-add-group="${this.addGroupName}"]`));
+
+        this.toggleGroups();
+        this.checkbox.addEventListener("change", () => this.toggleGroups());
+    }
+    toggleGroups() {
+        const checked = this.checkbox.checked;
+        checked ? this.addGroup() : this.removeGroup();
+    }
+    addGroup() {
+        const reversed = this.addFields.map(el => el).reverse();
+        reversed.forEach(fd => {
+            if (!fd.closest("body")) this.checkbox.parentNode.after(fd);
+            fd.removeAttribute("data-add-group");
+        });
+    }
+    removeGroup() {
+        this.addFields.forEach(fd => fd.remove());
+    }
+}
+
+// группы полей
+class InputGroup {
+    // группа
+    group;
+    // поля (объекты от Input)
+    inputParams;
+    // <p>...</p> с сообщением о незаполненных полях
+    uncompleteParagraph;
+
+    constructor(group, inputParams) {
+        this.group = group;
+        const hasUncomplParagraph = this.group.querySelector(".forms__fields-uncompleted:not(.__mobile)");
+        if (!hasUncomplParagraph) {
+            this.uncompleteParagraph = createElement("p", "forms__fields-uncompleted __desktop");
+            this.group.append(this.uncompleteParagraph);
+        }
+
+        const inputNames = Array.from(group.querySelectorAll("input"))
+            .map(inp => inp.name);
+        this.inputParams = inputParams.filter(inpParam => inputNames.includes(inpParam.name));
+
+        this.inputParams.forEach(inpParam => {
+            if (inpParam.inputs) {
+                inpParam.inputs.forEach(inp => {
+                    inp.addEventListener("change", this.checkCompletion.bind(this));
+                    document.querySelector("#form").addEventListener("submit", this.checkCompletion.bind(this));
+                });
+            } else if (inpParam.input) {
+                inpParam.input.addEventListener("blur", this.checkCompletion.bind(this));
+            }
+        });
+    }
+    checkCompletion() {
+        setTimeout(() => {
+            const uncompleted = this.inputParams.filter(param => !param.isCompleted);
+            const hasUncompleted = Boolean(uncompleted.length > 0);
+            if (hasUncompleted) {
+                this.group.classList.add("__uncomplete");
+                this.createUncompleteMessage(uncompleted);
+            } else this.group.classList.remove("__uncomplete");
+        }, 0);
+    }
+    createUncompleteMessage(uncompleted) {
+        if (this.uncompleteParagraph) {
+            let labelsText = "";
+            const labels = uncompleted.map(inpParams => {
+                return inpParams.ariaLabel;
+            });
+
+            if (labels[0]) {
+                labels.forEach((label, index) => {
+                    label = label.toLowerCase();
+                    if (index == 0) labelsText += " " + label;
+                    else labelsText += ", " + label;
+                });
+                if (labelsText) {
+                    labelsText += ".";
+                    this.uncompleteParagraph.textContent = "Пожалуйста, укажите: " + labelsText;
+                }
+            }
+        }
+    }
+}
+
+// общий класс для полей - текстовых, checkbox, radio...
+class Input {
+    // группа полей, к которой относится это поле
+    fieldGroup;
+    // имя поля/полей
+    name;
+    // метка поля из aria-label
+    ariaLabel;
+
+    constructor(input) {
+        this.fieldGroup = input.closest(".forms__fields-group");
+    }
+}
+// текстовые поля
+class TextInput extends Input {
+    // само поле input
+    input;
+    // сам input или его родитель
+    inputWrapper;
+    // группа input'ов, под которыми появляется общий текст о незаполнении
+    inputGroup;
+    // условия, при которых input считается заполненным. Это объект с полями minLength, maxLength (проверяют длину value) и match (массив со строками, одна из которых должна соответствовать value)
+    completeCondition;
+    // может отсутствовать. Указывает на маску заполнения поля
+    mask;
+    // может отсутствовать. Содержит список возможных опций (массив)
+    options;
+
+    constructor(input) {
+        super(input);
+        this.input = input;
+        this.name = input.name;
+        this.ariaLabel = input.getAttribute("aria-label");
+        this.inputGroup = this.input.closest(".forms__fields-group");
+
+        if (this.input.classList.contains("field__wrapper")) this.inputWrapper = this.input;
+        else this.inputWrapper = this.input.closest(".field__wrapper");
+
+        if (input.dataset.mask) this.createMask();
+        this.getCompleteConditions();
+        this.getOptions();
+        // обработчики
+        this.input.addEventListener("focus", this.onFocus.bind(this));
+        this.input.addEventListener("blur", this.onBlur.bind(this));
+        this.input.addEventListener("change", this.onBlur.bind(this));
+        if (this.input.hasAttribute("data-numbers-only"))
+            this.input.addEventListener("input", this.typeNumberOnly.bind(this));
+    }
+    // получить условия, при которых input считается корректно заполненным
+    getCompleteConditions() {
+        const mask = this.mask;
+        const completeLength = this.input.dataset.completeLength;
+        const hasCompleteMatch = this.input.hasAttribute("data-complete-match");
+
+        if (mask) {
+            let maxLength;
+            let minLength = mask.length;
+            this.completeCondition = { minLength, maxLength };
+        } else if (completeLength) {
+            const values = completeLength.split(", ");
+            this.completeCondition = { minLength: values[0], maxLength: values[1] };
+        } else if (hasCompleteMatch) {
+            let completeMatch = this.input.dataset.completeMatch;
+            let values = [];
+            // если не указаны в атрибуте, искать в .field__options-item элементах
+            if (!completeMatch) {
+                values = Array.from(document.querySelectorAll(".field__options-item"))
+                    .map(item => item.textContent || item.innerText);
+            }
+            // если указаны в атрибуте в формате Значение1|Значение2, взять оттуда
+            else {
+                values = completeMatch.split("|");
+            }
+            this.completeCondition = { match: values };
+        }
+        // если не указаны никакие условия
+        else this.completeCondition = { minLength: 0 };
+    }
+    // получить опции и, если есть, повесить обработчики
+    getOptions() {
+        this.options = Array.from(this.inputWrapper.closest(".field").querySelectorAll(".field__options-item"));
+        this.options.forEach(opt => {
+            opt.addEventListener("pointerdown", () => {
+                this.input.focus();
+                this.input.value = opt.textContent || opt.innerText;
+            });
+        });
+    }
+    onFocus() {
+        this.inputWrapper.classList.add("__focus");
+    }
+    onBlur() {
+        this.checkCompletion();
+        this.inputWrapper.classList.remove("__focus");
+    }
+    typeNumberOnly(event) {
+        const inputtedValue = event.data;
+        if (parseInt(inputtedValue) >= 0) return;
+        event.target.value = event.target.value.replace(inputtedValue, "_");
+    }
+    // если у поля есть маска заполнения
+    createMask() {
+        const mask = this.input.dataset.mask;
+        if (!mask) return;
+
+        this.mask = mask;
+        this.input.removeAttribute("data-mask");
+        checkInputMask = checkInputMask.bind(this);
+        this.mask = mask;
+        const input = this.input;
+        if (!input.hasAttribute("placeholder")) input.setAttribute("placeholder", mask);
+
+        input.addEventListener("focus", checkInputMask);
+        input.addEventListener("pointerdown", checkInputMask);
+        input.addEventListener("input", checkInputMask);
+        function checkInputMask(event) {
+            const positions = mask.split("");
+            let valueNew = "";
+
+            if (event.type === "input") {
+                if (event.data) {
+                    const val = input.value.split("");
+                    const spliced = val.splice(input.selectionStart - 1, 1);
+                    input.value = val.join("") + spliced;
+                }
+            }
+            for (let i = 0; i < positions.length; i++) {
+                if (positions[i] === "_") {
+                    if (input.value[i]) {
+                        valueNew += input.value[i];
+                        continue;
+                    } else break;
+                }
+                valueNew += positions[i];
+            }
+            input.value = valueNew;
+        }
+    }
+    tabBetweenInputs(event) {
+        const input = event.target;
+        const valueLength = input.getAttribute("maxlength");
+        if (input.value.length == valueLength || input.value.length == 0) {
+            const parent = input.parentNode;
+            const otherInputs = Array.from(parent.childNodes)
+                .filter(node => node.classList.contains("field__input"));
+            const currentIndex = otherInputs.findIndex(el => el == input);
+            // при очистке - вернуться на предыдущий
+            if (!event.data && input.value.length == 0) {
+                const prevInput = otherInputs[currentIndex - 1];
+                if (prevInput) prevInput.focus();
+            } else { // при заполнении - перейти к следующему
+                const nextInput = otherInputs[currentIndex + 1];
+                if (nextInput) nextInput.focus();
+            }
+        }
+    }
+    // проверять, правильно ли заполнен input. Если нет - вывести соответствующий текст
+    checkCompletion() {
+        const conditions = this.completeCondition;
+        let value = this.input.value;
+        // проверка на совпадение с data-complete-match
+        if (conditions.match) {
+            if (conditions.match.includes(value)) this.isCompleted = true;
+            else this.isCompleted = false;
+        }
+        // проверка на длину из data-mask или data-complete-length
+        else if (conditions.minLength >= 0) {
+            let isRightNumber = false;
+            // если указан верхний порог
+            if (conditions.maxLength) {
+                isRightNumber = value.length >= conditions.minLength && value.length <= conditions.maxLength;
+            }
+            // если верхнего порога нет
+            else isRightNumber = value.length >= conditions.minLength;
+
+            // если в input с data-mask есть незаполненные места
+            if (this.input.value.includes("_")) isRightNumber = false;
+
+            this.isCompleted = isRightNumber;
+        }
+
+        this.setCompletedState();
+    }
+    setCompletedState() {
+        switch (this.isCompleted) {
+            case true:
+                this.inputWrapper.classList.remove("__uncomplete");
+                break;
+            case false:
+            default:
+                this.inputWrapper.classList.add("__uncomplete");
+                break;
+        }
+    }
+}
+class TextSelect extends TextInput {
+    constructor(input) {
+        super(input);
+        this.optionsUl = this.inputWrapper.querySelector(".text-select__options");
+        this.optionItems = this.inputWrapper.querySelectorAll(".text-select__option-item");
+        this.setItemsHandler();
+    }
+    setItemsHandler() {
+        this.optionItems.forEach(item => {
+            item.addEventListener("pointerdown", (event) => {
+                this.input.value = event.target.textContent || event.target.innerText;
+                this.input.dispatchEvent(new Event("change"));
+            });
+        });
+    }
+}
+class TextSelectWorkYear extends TextSelect {
+    constructor(input) {
+        super(input);
+        this.maxYears = 30;
+        this.setValues();
+        this.input.addEventListener("change", this.checkCompletion.bind(this));
+    }
+    setValues() {
+        this.currentYear = new Date().getFullYear();
+        this.oldestYear = this.currentYear - this.maxYears;
+        this.optionsUl.innerHTML = "";
+        this.optionItems = [];
+        for (let i = 1; i <= this.maxYears; i++) {
+            const li = createElement("li", "text-select__option-item", this.currentYear - i);
+            this.optionsUl.append(li);
+            this.optionItems.push(li);
+        }
+
+        this.setItemsHandler();
+    }
+    checkCompletion() {
+        const val = parseInt(this.input.value) || 0;
+        if (val > this.currentYear || val < this.oldestYear) {
+            this.isCompleted = false;
+            this.input.closest(".field__input").classList.add("__uncomplete");
+        } else {
+            this.isCompleted = true;
+            this.input.closest(".field__input").classList.remove("__uncomplete");
+        }
+
+        super.setCompletedState();
+    }
+}
+class TextInputMulti extends TextInput {
+    constructor(inputWrapper) {
+        super(inputWrapper);
+        this.inputWrapper = inputWrapper;
+        if (!this.inputWrapper.querySelector("input[type='hidden']")) {
+            this.input = createElement("input");
+            this.input.setAttribute("type", "hidden");
+            this.input.setAttribute("name", inputWrapper.dataset.name);
+            this.name = this.input.name;
+            this.inputWrapper.append(this.input);
+            this.existed = false;
+        } else {
+            this.input = this.inputWrapper.querySelector("input[type='hidden']");
+            this.name = this.input.name;
+            this.existed = true;
+        }
+        this.fieldNameBlock = this.inputWrapper.closest(".field").querySelector(".field__name");
+        if (this.fieldNameBlock) this.ariaLabel = this.fieldNameBlock.textContent;
+        this.inputs = Array.from(this.inputWrapper.querySelectorAll("input[type='text']"));
+
+        this.inputs.forEach(input => {
+            if (input.hasAttribute("data-numbers-only"))
+                input.addEventListener("input", this.typeNumberOnly.bind(this));
+            input.addEventListener("input", this.setValue.bind(this));
+            input.style.textAlign = "center";
+        });
+    }
+    typeNumberOnly(event) {
+        super.typeNumberOnly(event);
+    }
+    checkCompletion() {
+        super.checkCompletion();
+    }
+    setValue(event) {
+        const targInput = event.target;
+
+        let value = "";
+        this.inputs.forEach(inp => value += inp.value);
+        this.input.value = value;
+
+        if (targInput.value.length >= targInput.getAttribute("maxlength")) {
+            const currentIndex = this.inputs.indexOf(targInput);
+            const nextInput = this.inputs[currentIndex + 1];
+            if (nextInput) nextInput.focus();
+        }
+    }
+}
+class TextInputTags extends TextInput {
+    addButton;
+    tags;
+    list;
+
+    constructor(input) {
+        super(input);
+        this.tags = [];
+        this.addButton = this.inputWrapper.querySelector(".field-tags__add-icon");
+        this.addButton.addEventListener("click", this.addTag.bind(this));
+        input.addEventListener("keydown", (event) => {
+
+            if (event.keyCode == 13) {
+                this.addTag();
+            }
+        });
+    }
+    addTag() {
+        if (!this.list) this.list = createElement("ul", "tags-list");
+        const tagItem = createElement("li", "tags-list__item");
+        const value = this.input.value.trim();
+        if (!value || this.tags.find(tg => tg.querySelector("input").value === value))
+            return;
+        if (!this.list.closest("body")) this.inputWrapper.parentNode.append(this.list);
+
+        const button = createElement("button", "tags-list__item-remove icon-close");
+        button.addEventListener("click", (event) => {
+            if (event.pointerType) this.removeTag(tagItem);
+        });
+
+        tagItem.insertAdjacentHTML("afterbegin", `<input name="${this.name}" type="hidden" disabled value="${value}">`);
+
+        tagItem.insertAdjacentHTML("afterbegin", `<span class="tags-list__item-text">${value}</span>`);
+        tagItem.append(button);
+        tagItem.setAttribute("title", value);
+
+        this.list.append(tagItem);
+        this.tags.push(tagItem);
+        this.handleTagItemWidth(tagItem);
+        this.input.value = "";
+        this.checkCompletion();
+    }
+    handleTagItemWidth(tagItem) {
+        onResize = onResize.bind(this);
+        const tagText = tagItem.querySelector(".tags-list__item-text");
+        const tagBtn = tagItem.querySelector(".tags-list__item-remove");
+
+        window.addEventListener("resize", onResize);
+        onResize();
+
+        function onResize() {
+            if (!tagItem.closest("body")) return window.removeEventListener("resize", onResize);
+
+            if (!this.rootContainer) this.rootContainer = document.querySelector(".container");
+            const maxWidth = this.rootContainer.clientWidth - tagBtn.offsetWidth - 10;
+            const clone = tagItem.cloneNode(true);
+            clone.style.cssText = "position: absolute; z-index: -999; opacity: 0";
+            this.rootContainer.append(clone);
+            tagText.textContent = cutValue(tagText.textContent, clone, maxWidth, 85);
+            if (tagItem.offsetWidth > maxWidth - 10) tagItem.style.marginRight = "0px";
+            clone.remove();
+        }
+        function cutValue(value, clone, maxWidth, valueMaxlength) {
+            let valueCut = value.length > valueMaxlength
+                ? value.substring(0, valueMaxlength - 3) + "..."
+                : value;
+            clone.querySelector(".tags-list__item-text").textContent = valueCut;
+            if (clone.offsetWidth > maxWidth)
+                return cutValue(valueCut, clone, maxWidth, valueMaxlength - 1);
+
+            return valueCut;
+        }
+    }
+    removeTag(tagItem) {
+        const index = this.tags.indexOf(tagItem);
+        this.tags.splice(index, 1);
+        tagItem.remove();
+        if (this.tags.length < 1) this.list.remove();
+    }
+    checkCompletion() {
+        if (!this.input.closest("body")) return this.isCompleted = true;
+        this.isCompleted = this.tags.length > 0;
+        this.setCompletedState();
+    }
+}
+// отдельный класс для поля дат
+class TextInputDate extends TextInputMulti {
+    constructor(input) {
+        super(input);
+        this.currentYear = new Date().getFullYear();
+        input.addEventListener("change", this.checkCompletion.bind(this));
+        this.inputs.forEach((inp, index) => {
+            inp.addEventListener("input", this.checkCompletion.bind(this));
+            inp.addEventListener("blur", this.checkCompletion.bind(this));
+            if (index == this.inputs.length - 1) inp.addEventListener("input", this.moveValueToLeft.bind(this));
+            else inp.addEventListener("input", this.replaceNextSubvalue.bind(this));
+        });
+        this.inputsLength = this.inputs.map(input => {
+            const maxlength = input.getAttribute("maxlength");
+            input.removeAttribute("maxlength");
+            return { input, maxlength }
+        });
+    }
+    setValue(event) {
+        const targInput = event.target;
+
+        let value = "";
+        this.inputs.forEach(inp => value += inp.value);
+        this.input.value = value;
+        const maxlength = this.inputsLength.find(inpData => inpData.input == targInput).maxlength;
+
+        if (targInput.value.length >= maxlength) {
+            const currentIndex = this.inputs.indexOf(targInput);
+            const nextInput = this.inputs[currentIndex + 1];
+            if (nextInput) nextInput.focus();
+        }
+    }
+    moveValueToLeft(event) {
+        if (!event.data) return;
+
+        const lastInput = this.inputs[this.inputs.length - 1];
+        const lastInputMaxlength = this.inputsLength[this.inputsLength.length - 1].maxlength;
+        if (event.target !== lastInput) return;
+
+        let totalMaxlength = 0;
+        let totalValueLength = 0;
+        this.inputsLength.forEach(inpData => {
+            totalMaxlength += parseInt(inpData.maxlength || 0);
+            const spaces = inpData.input.value.match(/\s/g);
+            const spacesLength = spaces ? spaces.length : 0;
+            totalValueLength += inpData.input.value.length - spacesLength;
+        });
+
+        if (
+            totalValueLength < totalMaxlength
+            && lastInput.value.length > lastInputMaxlength
+        ) {
+            let totalValue = "";
+            this.inputs.forEach(inp => {
+                const maxlength = this.inputsLength.find(inpData => inpData.input == inp).maxlength;
+                let value = inp.value;
+                if (value.length < maxlength) {
+                    const dif = maxlength - value.length;
+                    // for (let i = 0; i < dif; i++) value += " ";
+                }
+                totalValue += value;
+            });
+            const lastInputLength = lastInputMaxlength;
+            const selectPosition = lastInput.selectionStart;
+            lastInput.selectionEnd = selectPosition;
+
+            let start = totalValue.split("").slice(0, totalValue.length - lastInputLength - 1);
+            let end = lastInput.value.split("");
+            let endStart = end.slice(0, selectPosition);
+            let endEnd = end.slice(selectPosition);
+            end = endStart.concat(endEnd);
+
+            let newTotalValue = start.concat(end);
+            const inputEvent = new Event("input");
+            this.inputs.map(inp => inp)
+                .reverse()
+                .forEach(inp => {
+                    const length = this.inputsLength.find(inpData => inpData.input == inp).maxlength;
+                    inp.value = newTotalValue.slice(length * -1).join("");
+                    newTotalValue.splice(newTotalValue.length - length);
+                    inp.dispatchEvent(inputEvent);
+                });
+            lastInput.focus();
+        }
+        if (lastInput.value.length > lastInputMaxlength) {
+            lastInput.selectionStart -= 1;
+            lastInput.selectionEnd = lastInput.selectionStart + 1;
+            lastInput.setRangeText("");
+            lastInput.focus();
+        }
+    }
+    replaceNextSubvalue(event) {
+        if ((!event.data && event.inputType !== "insertFromPaste") || !event.isTrusted) return;
+
+        const input = event ? event.target : null;
+        if (input) {
+            const maxlength = this.inputsLength.find(inpData => inpData.input == input).maxlength;
+            if (event.inputType === "insertFromPaste") {
+                const val = input.value.split("");
+                val.splice(maxlength);
+                input.value = val.join("");
+                return;
+            }
+            if (input.value.length > maxlength) {
+                const dataLength = event.data.length > maxlength ? maxlength : event.data.length;
+                input.selectionEnd = input.selectionStart + dataLength;
+                input.setRangeText("");
+                if (input.selectionEnd < maxlength) input.focus();
+            }
+            if (input.value.length > maxlength) {
+                input.selectionStart -= 1;
+                input.selectionEnd = input.selectionStart + 1;
+                input.setRangeText("");
+            }
+        }
+    }
+    checkCompletion() {
+        this.validate();
+        this.isCompleted = this.isValid ? true : false;
+        super.setCompletedState();
+    }
+    validate() {
+        const value = this.input.value;
+        const numbers = value.split("").filter(str => parseInt(str) >= 0).join("");
+        if (!parseInt(numbers)) return;
+        const day = Number(numbers[0] + numbers[1]);
+        const month = Number(numbers[2] + numbers[3]);
+        const year = Number(numbers.slice(-4));
+        const currentYear = new Date().getFullYear();
+        const age = currentYear - year;
+
+        const invalidDay = day < 1 || day >= 32 || (day > 29 && month == "2") || (day > 30 && (month == "4" || month == "6" || month == "9" || month == "11"));
+        const invalidMonth = month < 1 || month > 12;
+        const invalidYear = age < 10 || age >= 100;
+
+        if (invalidDay || invalidMonth) return this.isValid = false;
+
+        this.isValid = true;
+        return { day, month, year, currentYear, age, invalidYear };
+    }
+}
+class TextInputBirthDate extends TextInputDate {
+    // знаки зодиака
+    zodiacSigngs;
+
+    constructor(input) {
+        super(input);
+        this.zodiacSigngs = [
+            { name: "Водолей", startMonth: 1, startDay: 21, endDay: 18, iconName: "aquarius" },
+            { name: "Рыбы", startMonth: 2, startDay: 19, endDay: 20, iconName: "pisces" },
+            { name: "Овен", startMonth: 3, startDay: 21, endDay: 19, iconName: "aries" },
+            { name: "Телец", startMonth: 4, startDay: 20, endDay: 20, iconName: "taurus" },
+            { name: "Близнецы", startMonth: 5, startDay: 21, endDay: 20, iconName: "gemini" },
+            { name: "Рак", startMonth: 6, startDay: 21, endDay: 22, iconName: "cancer" },
+            { name: "Лев", startMonth: 7, startDay: 23, endDay: 22, iconName: "leo" },
+            { name: "Дева", startMonth: 8, startDay: 23, endDay: 22, iconName: "virgo" },
+            { name: "Весы", startMonth: 9, startDay: 23, endDay: 22, iconName: "libra" },
+            { name: "Скорпион", startMonth: 10, startDay: 23, endDay: 21, iconName: "scorpio" },
+            { name: "Стрелец", startMonth: 11, startDay: 22, endDay: 21, iconName: "sagittarius" },
+            { name: "Козерог", startMonth: 12, startDay: 22, endDay: 20, iconName: "capricorn" },
+        ];
+        this.uncompletedText = this.input.closest(".field").querySelector(".forms__fields-uncompleted");
+
+        this.minYearSpan = this.uncompletedText.querySelector(".birthdate-min-year");
+        this.maxYearSpan = this.uncompletedText.querySelector(".birthdate-max-year");
+        this.minYear = this.currentYear - 99;
+        this.maxYear = this.currentYear - 10;
+        this.minYearSpan.textContent = this.minYear.toString();
+        this.maxYearSpan.textContent = this.maxYear.toString();
+
+        if (this.existed) this.checkCompletion();
+    }
+    validate() {
+        const dateValues = super.validate();
+        if (!dateValues) return;
+        if (dateValues.invalidYear) return this.isValid = false;
+        const zodiac = this.zodiacSigngs
+            .filter(zs => zs.startMonth == dateValues.month || zs.startMonth + 1 == dateValues.month)
+            .find((zs, index, array) => {
+                const nextZs = array[index + 1];
+                if (nextZs) {
+                    if (dateValues.day >= zs.startDay && dateValues.day <= nextZs.endDay) return true;
+                    if (dateValues.day < zs.startDay) return true;
+                } else return true;
+            });
+        const zodiacValue = zodiac ? zodiac.name : "";
+
+
+        const ageInput = document.querySelector("input[name='age']");
+        const zodiacInput = document.querySelector("input[name='zodiac']");
+        const changeEvent = new Event("change");
+        if (ageInput) {
+            ageInput.value = dateValues.age;
+            ageInput.dispatchEvent(changeEvent);
+        }
+        if (zodiacInput) {
+            const zodiacIcon = createElement("span", `zodiac-icon icon-${zodiac.iconName || ""}`);
+            const oldZodiacIcons = zodiacInput.parentNode.querySelectorAll(".zodiac-icon");
+            oldZodiacIcons.forEach(zi => zi ? zi.remove() : false);
+            zodiacInput.before(zodiacIcon);
+            zodiacInput.value = zodiacValue;
+            zodiacInput.dispatchEvent(changeEvent);
+        }
+    }
+}
+// checkbox, radio
+class SelectionInput extends Input {
+    // блок с кнопками 
+    selectionField;
+    // массив самих кнопок (checkbox, radio)
+    inputs;
+    // выбранный input / массив выбранных input
+    input;
+    // вычисляется по первому найденному input ("checkbox"|"radio")
+    type;
+    // становится true, если выбрано хотя бы одно значение
+    isCompleted;
+
+    constructor(selectionField) {
+        super(selectionField);
+        this.selectionField = selectionField;
+        this.inputs = Array.from(selectionField.querySelectorAll("input"));
+        this.ariaLabel = this.inputs[0].getAttribute("aria-label");
+        this.type = this.inputs[0].type;
+        this.name = this.inputs[0].name;
+
+        if (this.type === "checkbox") {
+            this.inputs = Array.from(
+                document.querySelectorAll(`[name=${this.name}]`)
+            )
+            this.inputs.forEach(inp => inp.addEventListener("change", () => {
+                this.selectionField.dispatchEvent(new Event("change"));
+            }));
+        };
+
+        this.selectionField.addEventListener("change", this.checkCompletion.bind(this));
+    }
+    checkCompletion() {
+        this.setInput();
+        const isCompleted = this.type == "checkbox"
+            ? Boolean(this.input.length > 0)
+            : Boolean(this.input);
+        if (!isCompleted) this.selectionField.classList.add("__uncomplete");
+        else this.selectionField.classList.remove("__uncomplete");
+        this.isCompleted = isCompleted;
+    }
+    setInput() {
+        if (this.type === "checkbox") this.input = this.inputs.filter(inp => inp.checked);
+        if (this.type === "radio") this.input = this.inputs.find(inp => inp.checked) || this.inputs[0];
+    }
+}
+class CheckEndWorkYear extends SelectionInput {
+    constructor(cb) {
+        super(cb);
+        this.field = this.inputs[0].closest(".field");
+        this.formsContainer = this.inputs[0].closest(".forms__container");
+        this.unrequired = Array.from(this.field.querySelectorAll(".endyear-not-checkbox")).reverse();
+        this.otherCheckboxes = Array.from(this.formsContainer.querySelectorAll(".endyear-checkbox"));
+        this.checkCompletion();
+        cb.addEventListener("change", this.onChange.bind(this));
+    }
+    checkCompletion() {
+        this.isCompleted = true;
+        return;
+    }
+    onChange() {
+        if (this.inputs[0].checked) {
+            this.unrequired = this.unrequired.map(el => {
+                if (el) {
+                    el.remove();
+                    return el.cloneNode(true);
+                }
+            });
+            this.formsContainer.querySelectorAll(".endyear-checkbox")
+                .forEach(checkbox => {
+                    if (this.inputs[0].closest(".checkbox") !== checkbox)
+                        checkbox.style.display = "none";
+                });
+        } else {
+            this.unrequired.forEach(el => {
+                if (el && !el.closest("body")) this.inputs[0].parentNode.after(el);
+                this.formsContainer.querySelectorAll(".endyear-checkbox")
+                    .forEach(checkbox => checkbox.style.removeProperty("display"));
+            });
+        }
+    }
+}
+// select (построен на radio)
+class Select extends SelectionInput {
+    selectionField;
+    inputs;
+    isShown;
+
+    constructor(selectionField) {
+        super(selectionField);
+        this.selectionField = selectionField;
+        this.value = selectionField.querySelector(".select__value");
+        this.inputs = Array.from(selectionField.querySelectorAll("input[type='radio']"));
+        this.isShown = this.selectionField.classList.contains("__shown");
+        this.toggle = this.toggle.bind(this);
+        this.closeByDocument = this.closeByDocument.bind(this);
+
+        this.setValues();
+        this.initOptions();
+        this.selectionField.addEventListener("click", this.toggle);
+        document.addEventListener("click", this.closeByDocument);
+    }
+    closeByDocument(event) {
+        if (event.target !== this.selectionField && event.target !== this.value) {
+            if (this.isShown) this.hide();
+        }
+    }
+    setValues() {
+        this.inputs.forEach(input => {
+            const parent = input.parentNode;
+            const value = input.value;
+            if (!parent.textContent.includes(value)) parent.insertAdjacentHTML("beforeend", value);
+        });
+    }
+    initOptions() {
+        this.inputs.forEach(input => {
+            input.addEventListener("change", () => {
+                this.value.textContent = input.value;
+            });
+        });
+    }
+    toggle() {
+        if (this.selectionField.classList.contains("__shown")) this.hide();
+        else this.show();
+    }
+    show() {
+        this.isShown = true;
+        this.selectionField.classList.add("__shown");
+    }
+    hide() {
+        this.isShown = false;
+        this.selectionField.classList.remove("__shown");
+    }
+    onDestroy() {
+        this.selectionField.removeEventListener("click", this.toggle);
+        document.removeEventListener("click", this.closeByDocument);
+    }
+}
+class SelectChildren extends Select {
+    constructor(selectionField) {
+        super(selectionField);
+        this.addButton = this.fieldGroup.querySelector(".add-field");
+        if (this.addButton) this.addButton.style.display = "none";
+        this.formsContainer = this.fieldGroup.closest(".forms__container");
+        this.inputs.forEach(input => {
+            input.addEventListener("change", () => this.onChange(input));
+        });
+
+        this.fieldGroup.addEventListener("change", () => this.checkCompletion());
+        this.addButton.addEventListener("click", this.onBtnClick.bind(this));
+    }
+    onBtnClick(event) {
+        event.preventDefault();
+        const childrenInputs = this.formsContainer.querySelectorAll(".children-group");
+        childrenInputs.forEach(inp => inp.addEventListener("change", this.checkCompletion.bind(this)));
+    }
+    onChange(input) {
+        if (this.addButton) {
+            if (input.value === "Есть") this.addButton.style.removeProperty("display");
+            if (input.value === "Нет") {
+                this.addButton.style.display = "none";
+                const groups = Array.from(this.formsContainer.querySelectorAll(".children-group"));
+                if (groups) groups.forEach(el => el.remove());
+            }
+        }
+    }
+    checkCompletion() {
+        const checked = this.inputs.find(inp => inp.checked);
+        if (checked && checked.value === "Есть") {
+            const selects = Array.from(this.formsContainer.querySelectorAll(".children-group"));
+            if (selects.length > 0) {
+                let hasRequiredChecked = true;
+                for (let sel of selects) {
+                    if (!sel.querySelector("input:checked")) return hasRequiredChecked = false;
+                }
+                this.isCompleted = hasRequiredChecked;
+                if (hasRequiredChecked) {
+                    const uncompleteClass = this.selectionField.closest(".__uncomplete");
+                    this.selectionField.classList.remove("__uncomplete");
+                    if (uncompleteClass) uncompleteClass.classList.remove("__uncomplete");
+                }
+            }
+            else this.isCompleted = false;
+        } else super.checkCompletion();
+    }
+}
+// ползунок
+class Range {
+    // все поле
+    rangeBlock;
+    // поле с бегунком
+    range;
+    // подшкалы, в которых указываются границы и шаги для этих границ
+    rangeSubscales;
+    // шкала
+    rangeScale;
+    // информация о шкале бегунка
+    rangeData;
+    // бегунок
+    toggler;
+    // поле со значением в цифрах
+    valueInput;
+    // значение
+    value;
+    // название поля
+    name;
+    // поле со значением
+    valueInput;
+
+    constructor(rangeBlock) {
+        if (!rangeBlock.querySelector("[data-range-limits]")) return;
+        this.rangeBlock = rangeBlock;
+        this.range = rangeBlock.querySelector(".range");
+        this.rangeScale = rangeBlock.querySelector(".range__scale");
+        this.toggler = rangeBlock.querySelector(".range__toggler");
+        this.valueInput = rangeBlock.querySelector(".range-block__value");
+        this.name = this.valueInput.name;
+        this.toggler.style.transform = "translate(-50%, 0)";
+
+        this.getData();
+        window.addEventListener("resize", this.getData.bind(this));
+
+        this.setTogglerHandlers();
+        this.setFocusHandler();
+        this.valueInput.addEventListener("change", this.checkInputValue.bind(this));
+        this.setValue(this.rangeData.minValue);
+    }
+    getData() {
+        if (!this.rangeData) {
+            this.rangeSubscales = Array.from(this.rangeBlock.querySelectorAll(".range__subscale"))
+                .map(subscale => {
+                    const limits = subscale.dataset.rangeLimits.split(", ");
+                    const step = parseInt(subscale.dataset.rangeStep);
+
+                    if (limits.length < 2)
+                        throw new Error("Неверно указаны значения data-range-limits в range");
+
+                    const minValue = parseInt(limits[0]);
+                    const maxValue = parseInt(limits[1]);
+                    subscale.remove();
+                    return { step, minValue, maxValue: maxValue || minValue };
+                });
+        }
+
+        const width = this.range.offsetWidth - this.toggler.offsetWidth / 1.2;
+        const minValue = this.rangeSubscales[0].minValue;
+        const maxValue = this.rangeSubscales[this.rangeSubscales.length - 1].maxValue;
+        const totalValue = maxValue - minValue;
+        this.rangeData = {
+            width,
+            minValue,
+            maxValue,
+            totalValue,
+            step: totalValue / width
+        }
+        this.setValue(this.rangeData.minValue);
+        this.toggler.style.transform = "translate(-50%, 0)";
+        this.moveToggler(0);
+    }
+    setTogglerHandlers() {
+        onMove = onMove.bind(this);
+        onUp = onUp.bind(this);
+
+        const toggler = this.toggler;
+        const range = this.range;
+        const maxRangeWidth = this.rangeData.width;
+        let shift = getCoords(this.range).left + toggler.offsetWidth / 2;
+        toggler.addEventListener("pointerdown", onDown.bind(this));
+        range.addEventListener("pointerdown", onDown.bind(this));
+        toggler.ondragstart = () => false;
+        range.ondragstart = () => false;
+        this.rangeScale.style.width = getComputedStyle(toggler).left;
+
+        function onDown(event) {
+            event.preventDefault();
+            shift = getCoords(this.range).left + toggler.offsetWidth / 2;
+
+            // курсор на бегунке
+            if (event.target === toggler) {
+                document.addEventListener("pointermove", onMove);
+                document.addEventListener("pointerup", onUp);
+                toggler.classList.add("__moving");
+            }
+            // курсор на шкале
+            else {
+                const x = event.clientX - shift;
+                if (x >= 0 && x <= maxRangeWidth) {
+                    toggler.style.left = `${x}px`;
+                    toggler.dispatchEvent(new Event("pointerdown"));
+                }
+            }
+        }
+        function onMove(event) {
+            let x = event.clientX - shift;
+
+            if (x < 0) x = 0;
+            else if (x > maxRangeWidth) x = maxRangeWidth;
+
+            let newValue = Math.round(this.rangeData.step * x) + this.rangeData.minValue;
+            const reqStep = this.rangeSubscales.find(sbsc => {
+                return newValue >= sbsc.minValue && newValue <= sbsc.maxValue;
+            }).step;
+            const n = parseInt(newValue / reqStep);
+            newValue = (n * reqStep - this.rangeData.minValue);
+            x = newValue / this.rangeData.step;
+
+
+            this.moveToggler(x);
+            this.valueInput.value =
+                Math.round(this.rangeData.step * x) + this.rangeData.minValue;
+            this.valueInput.dispatchEvent(new Event("change"));
+        }
+        function onUp() {
+            document.removeEventListener("pointermove", onMove);
+            document.removeEventListener("pointerup", onUp);
+            toggler.classList.remove("__moving");
+        }
+    }
+    checkInputValue(event) {
+        const input = this.valueInput;
+        let value = parseInt(input.value.replace(/\D/g, ""));
+        if (value > this.rangeData.maxValue) value = this.rangeData.maxValue;
+        if (value < this.rangeData.minValue) value = this.rangeData.minValue;
+        input.value = value.toLocaleString() + " рублей";
+
+        // при введении пользователем числа
+        if (event.isTrusted) {
+            const x = (value - this.rangeData.minValue) / this.rangeData.step;
+            this.moveToggler(x);
+        }
+    }
+    setValue(val) {
+        this.valueInput.value = val;
+        this.valueInput.dispatchEvent(new Event("change"));
+    }
+    moveToggler(x) {
+        this.toggler.style.left = `${x}px`;
+        this.rangeScale.style.width = `${x}px`;
+        this.togglerLeft = x;
+
+        const xtrunc = parseInt(x);
+        if (xtrunc === 0) this.toggler.style.cssText += "transform: translate(-50%, 0%)";
+        if (xtrunc >= parseInt(this.rangeData.width)) {
+            this.toggler.style.cssText += "transform: translate(50%, 0%)";
+            this.rangeScale.style.width = `${x + this.toggler.offsetWidth}px`;
+        }
+        if (xtrunc !== 0 && xtrunc !== parseInt(this.rangeData.width)) {
+            this.toggler.style.removeProperty("transform");
+        }
+    }
+    setFocusHandler() {
+        this.rangeBlock.addEventListener("click", () => this.valueInput.focus());
+        this.valueInput.addEventListener("focus", () => this.rangeBlock.classList.add("__focus"));
+        this.valueInput.addEventListener("blur", () => this.rangeBlock.classList.remove("__focus"));
+    }
+}
+// загрузка фото
+class LoadImage {
+    constructor(block) {
+        this.imageBlock = block;
+        this.input = block.querySelector("input[type='file']");
+        this.loadButton = block.querySelector(".load-image__button");
+        this.contentBlock = block.querySelector(".load-image__content");
+        this.img = block.querySelector("#load-image__preview");
+        this.cutSquare = block.querySelector(".cut-square");
+        this.cutCircle = block.querySelector(".cut-circle");
+        this.closeButton = block.querySelector(".load-image__close");
+        this.format = block.querySelector("#load-image__format");
+        this.size = block.querySelector("#load-image__size");
+        this.resolution = block.querySelector("#load-image__resolution");
+        this.info = block.querySelector(".load-image__info");
+
+        this.format.addEventListener("change", this.onInputChange.bind(this));
+        this.size.addEventListener("change", this.onInputChange.bind(this));
+        this.resolution.addEventListener("change", this.onInputChange.bind(this));
+
+        this.cutSquareParams = new CutImage(this.cutSquare, 85);
+        this.cutCircleParams = new CutImage(this.cutCircle, 85, true);
+
+        this.img.addEventListener("click", () => modal.createImageModal(this.img.src));
+
+        this.info.classList.add("__removed");
+        this.input.addEventListener("change", this.loadImage.bind(this));
+        this.closeButton.addEventListener("click", this.remove.bind(this));
+
+        this.hideContent();
+    }
+    onInputChange(event) {
+        const input = event.target;
+        const value = input.value;
+        input.style.width = `${value.length / 1.5}em`;
+    }
+    loadImage() {
+        const file = this.input.files[0];
+        const reader = new FileReader();
+
+        if (file) {
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const src = reader.result;
+                this.img.src = src;
+                const image = new Image();
+                image.src = src;
+                image.onload = () => {
+                    this.setImgDataValues(file, image);
+                    this.origSizes = { width: image.width, height: image.height };
+                    this.checkCompletion();
+                    this.showContent();
+                    this.cutSquareParams.init(image);
+                    this.cutCircleParams.init(image);
+                }
+            }
+        }
+    }
+    hideContent() {
+        this.contentBlock.classList.add("__removed");
+        this.loadButton.classList.remove("__removed");
+        this.info.classList.add("__removed");
+    }
+    showContent() {
+        this.contentBlock.classList.remove("__removed");
+        this.loadButton.classList.add("__removed");
+        this.info.classList.remove("__removed");
+    }
+    remove() {
+        this.input.value = "";
+        this.hideContent();
+        this.checkCompletion();
+    }
+    setImgDataValues(file, image) {
+        const changeEvent = new Event("change");
+        const splitName = file.name.split(".");
+        this.format.value = splitName[splitName.length - 1];
+        this.format.dispatchEvent(changeEvent);
+
+        this.size.value = calcSize(file.size);
+        this.size.dispatchEvent(changeEvent);
+
+        this.resolution.value = image.naturalWidth.toString() + "x" + image.naturalHeight.toString();
+        this.resolution.dispatchEvent(changeEvent);
+    }
+    checkCompletion() {
+        if (this.input.files[0]) {
+            this.isCompleted = true;
+            this.imageBlock.classList.remove("__uncomplete");
+        }
+        else {
+            this.isCompleted = false;
+            this.imageBlock.classList.add("__uncomplete");
+        }
+    }
+}
+// обрезка фото
+class CutImage {
+    constructor(block, previewSize, isCircle = false) {
+        this.block = block;
+        // !при изменении this.previewSize менять размеры в стилях .load-image__circle, .load-image__square!
+        this.isCircle = isCircle;
+        this.previewSize = previewSize;
+        this.img = block.querySelector(".load-image__small-img");
+        this.scaleModalCoef = 5;
+        this.cutButton = block.querySelector(".load-image__apply-edit");
+        this.refreshButton = block.querySelector(".load-image__refresh-edit");
+        this.downloadButton = block.querySelector(".load-image__download-edit");
+        this.moveXButtonsBlock = block.querySelector(".load-image__move-x-buttons");
+        this.moveYButtonsBlock = block.querySelector(".load-image__move-y-buttons");
+        this.scaleButtonsBlock = block.querySelector(".load-image__scale-buttons");
+        this.initDataTexts();
+
+        this.img.ondragstart = () => false;
+        this.img.addEventListener("pointerdown", (event) => {
+            const onUp = (upEvent) => {
+                if (upEvent.clientX === x || upEvent.clientY === y) this.createFullSize(true);
+                this.img.removeEventListener("pointerup", onUp);
+            }
+
+            this.onPointerdown(event);
+            const x = event.clientX;
+            const y = event.clientY;
+            this.img.addEventListener("pointerup", onUp);
+        });
+
+        this.cutButton.addEventListener("click", (event) => {
+            event.preventDefault();
+            this.cut();
+        });
+        this.refreshButton.addEventListener("click", (event) => {
+            event.preventDefault();
+            this.refresh();
+        });
+        this.downloadButton.addEventListener("click", (event) => {
+            event.preventDefault();
+            this.downloadCut();
+        });
+
+        this.downloadButton.classList.add("__removed");
+
+        if (this.scaleButtonsBlock && this.moveYButtonsBlock && this.moveXButtonsBlock)
+            this.initControlsButtons();
+    }
+    initDataTexts(format = null, size = null, resolution = null) {
+        this.datablock = this.block.querySelector(".load-image__small-data");
+
+        if (this.datablock) {
+            this.format = this.datablock.querySelector(".load-image__small-data-format");
+            this.size = this.datablock.querySelector(".load-image__small-data-size");
+            this.resolution = this.datablock.querySelector(".load-image__small-data-resolution");
+
+            if (!format && !size && !resolution) this.toggleDetails("hide");
+            else {
+                this.toggleDetails("show");
+                this.format.textContent = format;
+                this.size.textContent = size;
+                this.resolution.textContent = resolution;
+            }
+        }
+    }
+    toggleDetails(action = "hide") {
+        if (this.datablock) {
+            if (action === "hide") this.datablock.classList.add("__removed");
+            if (action === "show") this.datablock.classList.remove("__removed");
+        }
+    }
+    downloadCut() {
+        download = download.bind(this);
+        downloadByRadio = downloadByRadio.bind(this);
+
+        const content = `
+            <div class="radiobuttons">
+                <label class="radiobuttons__item">
+                    <input type="radio" name="modal-window_download-type" value="origin" class="radiobuttons__input">
+                    <svg width="20" height="20" viewBox="0 0 23 23">
+                        <circle cx="10" cy="10" r="9"></circle>
+                        <path
+                            d="M10,7 C8.34314575,7 7,8.34314575 7,10 C7,11.6568542 8.34314575,13 10,13 C11.6568542,13 13,11.6568542 13,10 C13,8.34314575 11.6568542,7 10,7 Z"
+                            class="radiobuttons__item-inner"></path>
+                        <path
+                            d="M10,1 L10,1 L10,1 C14.9705627,1 19,5.02943725 19,10 L19,10 L19,10 C19,14.9705627 14.9705627,19 10,19 L10,19 L10,19 C5.02943725,19 1,14.9705627 1,10 L1,10 L1,10 C1,5.02943725 5.02943725,1 10,1 L10,1 Z"
+                            class="radiobuttons__item-outer"></path>
+                    </svg>
+                    Сохранить оригинальный размер
+                </label>
+                <label class="radiobuttons__item">
+                    <input type="radio" name="modal-window_download-type" value="cut" class="radiobuttons__input">
+                    <svg width="20" height="20" viewBox="0 0 23 23">
+                        <circle cx="10" cy="10" r="9"></circle>
+                        <path
+                            d="M10,7 C8.34314575,7 7,8.34314575 7,10 C7,11.6568542 8.34314575,13 10,13 C11.6568542,13 13,11.6568542 13,10 C13,8.34314575 11.6568542,7 10,7 Z"
+                            class="radiobuttons__item-inner"></path>
+                        <path
+                            d="M10,1 L10,1 L10,1 C14.9705627,1 19,5.02943725 19,10 L19,10 L19,10 C19,14.9705627 14.9705627,19 10,19 L10,19 L10,19 C5.02943725,19 1,14.9705627 1,10 L1,10 L1,10 C1,5.02943725 5.02943725,1 10,1 L10,1 Z"
+                            class="radiobuttons__item-outer"></path>
+                    </svg>
+                    Сохранить уменьшенный размер
+                </label>
+            </div>
+        `;
+        modal.createBasicModal(
+            "Скачать изображение",
+            content,
+            { text: "Скачать", confirmCallback: downloadByRadio },
+            "Отмена"
+        );
+        const modalBody = modal.getModalBody();
+        modalBody.classList.add("modal__body--small");
+
+        function downloadByRadio() {
+            const buttons = Array.from(modalBody.querySelectorAll("input[name='modal-window_download-type']"));
+            const checked = buttons.find(btn => btn.checked) || { value: "cut" };
+            const fullSizeData = this.createFullSize();
+            const origFullSizeData = { width: this.origSizes.width, height: this.origSizes.height };
+
+            let origImg;
+            if (checked.value === "origin" || checked.value === "both")
+                origImg = createOrigImg.call(this);
+
+            switch (checked.value) {
+                case "origin": download(origImg, origFullSizeData);
+                    break;
+                case "cut": download(fullSizeData.src, fullSizeData);
+                    break;
+            }
+        }
+
+        function createOrigImg() {
+            const canvas = createElement("canvas");
+            canvas.width = this.origSizes.width;
+            canvas.height = this.origSizes.height;
+            canvas.style.cssText = "position: absolute; z-index: -999;";
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(this.origImg, 0, 0);
+
+            return canvas.toDataURL("image/png");
+        }
+        function download(src, fullSizeData = this.createFullSize()) {
+            let downloadsData = localStorage.getItem("job1_users_downloads");
+            if (!downloadsData) {
+                localStorage.setItem("job1_users_downloads", {});
+                downloadsData = localStorage.getItem("job1_users_downloads");
+            }
+            const userFullName = getFullUserName();
+            const downloadsNumber = downloadsData[userFullName] || 1;
+            const name = `
+                ${userFullName}_${fullSizeData.width}x${fullSizeData.height}_000000000${downloadsNumber}
+            `.trim();
+
+            const link = createElement("a");
+            link.download = name;
+            link.href = src;
+            link.click();
+
+            downloadsData[userFullName] = downloadsNumber + 1;
+            localStorage.setItem("job1_users_downloads", downloadsData);
+        }
+        function getFullUserName() {
+            const userName = document.querySelector("input[name='name']").value || "Имя";
+            const userSurname = document.querySelector("input[name='surname']").value || "Фамилия";
+            const userPatronymic = document.querySelector("input[name='patronymic']").value || "";
+
+            if (userPatronymic) return `${userName}-${userSurname}-${userPatronymic}`;
+            else return `${userName}-${userSurname}`;
+        }
+    }
+    init(origImg) {
+        this.origImg = origImg;
+        this.origSizes = { width: origImg.width, height: origImg.height };
+        this.img.src = origImg.src;
+        this.setImg(origImg.width, origImg.height);
+        this.cutButton.classList.add("__removed");
+        this.refresh();
+    }
+    setImg(imageWidth, imageHeight) {
+        const coef = imageWidth / imageHeight;
+        if (imageWidth !== imageHeight) {
+            let width = coef * this.previewSize;
+            let height = this.previewSize;
+            if (width < 85) {
+                const scaleVal = this.previewSize / width;
+                width = width * scaleVal;
+                height = height * scaleVal;
+            }
+            if (height < 85) {
+                const scaleVal = this.previewSize / height;
+                width = width * scaleVal;
+                height = height * scaleVal;
+            }
+            this.img.width = width;
+            this.img.height = height;
+        }
+        else if (imageWidth === imageHeight) {
+            this.img.width = this.img.height = this.previewSize;
+        }
+
+        this.origSizesScaled = { width: this.img.width, height: this.img.height };
+
+        this.movedX = 0;
+        this.movedY = 0;
+        this.scaled = 1;
+        this.setTransform();
+    }
+    setTransform() {
+        this.cutButton.classList.remove("__removed");
+        this.img.style.transform =
+            `translate(${this.movedX || 0}px, ${this.movedY || 0}px)`;
+        this.img.width = this.origSizesScaled.width * this.scaled;
+        this.img.height = this.origSizesScaled.height * this.scaled;
+    }
+    cut() {
+        this.cutButton.classList.add("__removed");
+        this.scaleMin = this.scaled;
+        this.lastCutWidth = this.img.width;
+        this.lastCutHeight = this.img.height;
+        this.fixatedX = Math.abs(this.movedX);
+        this.fixatedY = Math.abs(this.movedY);
+        this.downloadButton.classList.remove("__removed");
+
+        const canvasData = this.createFullSize(false);
+        const size = calcSize(canvasData.src.length);
+        const resolution = `${canvasData.width}x${canvasData.height}`;
+        this.initDataTexts(canvasData.format, size, resolution);
+    }
+    refresh() {
+        this.scaleMin = 1;
+        this.scaled = 1;
+        this.movedY = 0;
+        this.movedX = 0;
+        this.setTransform();
+        this.lastCutWidth = 0;
+        this.lastCutHeight = 0;
+        this.fixatedX = 100;
+        this.fixatedY = 100;
+        this.scaleModal = this.scaleModalCoef / this.scaled;
+        this.downloadButton.classList.add("__removed");
+        this.toggleDetails("hide");
+    }
+    initControlsButtons() {
+        const moveXButtons = this.moveXButtonsBlock.querySelectorAll("[class*='move-x-']");
+        const moveYButtons = this.moveYButtonsBlock.querySelectorAll("[class*='move-y-']");
+        const scaleButtons = this.scaleButtonsBlock.querySelectorAll("[class*='scale-']");
+
+        moveXButtons.forEach(btn => btn.addEventListener("click", this.moveX.bind(this)));
+        moveYButtons.forEach(btn => btn.addEventListener("click", this.moveY.bind(this)));
+        scaleButtons.forEach(btn => btn.addEventListener("click", this.scale.bind(this)));
+    }
+    moveX(event) {
+        const btn = event.target;
+        if (btn.classList.contains("move-x-right")) this.moveTo("X", "-", 5);
+        if (btn.classList.contains("move-x-left")) this.moveTo("X", "+", 5);
+    }
+    moveY(event) {
+        const btn = event.target;
+        if (btn.classList.contains("move-y-bottom")) this.moveTo("Y", "-", 5);
+        if (btn.classList.contains("move-y-top")) this.moveTo("Y", "+", 5);
+    }
+    scale(event) {
+        const btn = event.target;
+        if (!this.scaleMin) this.scaleMin = 1;
+
+        if (btn.classList.contains("scale-minus")) {
+            if (this.scaled - 0.1 >= this.scaleMin) this.scaled -= 0.1;
+            else return;
+            this.movedY = this.movedX = 0;
+            this.fixatedX = 100;
+            this.fixatedY = 100;
+            this.lastCutWidth = 0;
+            this.lastCutHeight = 0;
+        }
+        if (btn.classList.contains("scale-plus")) {
+            if (this.scaled + 0.1 <= 5) this.scaled += 0.1;
+        }
+        this.scaleModal = this.scaleModalCoef / this.scaled;
+        this.setTransform();
+    }
+    onPointerdown(event) {
+        let xOld = event.clientX;
+        let yOld = event.clientY;
+
+        const onMove = (moveEvent) => {
+            let x = moveEvent.clientX;
+            let y = moveEvent.clientY;
+
+            if (x > xOld) this.moveTo("X", "+");
+            if (x < xOld) this.moveTo("X", "-");
+
+            if (y > yOld) this.moveTo("Y", "+");
+            if (y < yOld) this.moveTo("Y", "-");
+
+            xOld = x;
+            yOld = y;
+        }
+        const onUp = () => {
+            document.removeEventListener("pointermove", onMove);
+            document.removeEventListener("pointerup", onUp);
+        }
+
+        document.addEventListener("pointermove", onMove);
+        document.addEventListener("pointerup", onUp);
+    }
+    moveTo(coord, sign, step = 1) {
+        const imgCoords = getCoords(this.img);
+        const wrapperCoords = getCoords(this.img.parentNode);
+        let nextMoved = this[`moved${coord}`]; // this[movedX,movedY]
+
+        const widthCoef = this.img.width - this.lastCutWidth;
+        const heightCoef = this.img.height - this.lastCutHeight;
+
+        switch (sign) {
+            case "+": nextMoved += step;
+                break;
+            case "-": nextMoved -= step;
+                break;
+        }
+        if (sign === "-") step = step * (-1);
+
+        if (coord === "Y") {
+            const isInWrapper =
+                imgCoords.top + step <= wrapperCoords.top
+                && imgCoords.bottom + step >= wrapperCoords.bottom;
+            const isInCutBorders =
+                nextMoved <= this.fixatedY + heightCoef
+                && nextMoved >= this.fixatedY - heightCoef;
+            if (isInWrapper && isInCutBorders) this[`moved${coord}`] = nextMoved;
+        }
+        if (coord === "X") {
+            const isInWrapper =
+                imgCoords.left + step <= wrapperCoords.left
+                && imgCoords.right + step >= wrapperCoords.right;
+            const isInCutBorders =
+                nextMoved <= this.fixatedX + widthCoef
+                && nextMoved >= this.fixatedX - widthCoef;
+            if (isInWrapper && isInCutBorders) this[`moved${coord}`] = nextMoved;
+        }
+
+        this.setTransform();
+    }
+    createFullSize(doShow = false) {
+        const imgCoords = getCoords(this.img);
+        const imgWrapperCoords = getCoords(this.img.parentNode);
+
+        // нарисовать все изображение
+        const canvasOrig = createElement("canvas");
+        canvasOrig.width = document.documentElement.clientWidth || window.innerWidth;
+        canvasOrig.height = document.documentElement.clientHeight || window.innerHeight;
+        canvasOrig.style.cssText = "position: absolute; z-index: -99; opacity: 0";
+        document.body.append(canvasOrig);
+        const ctxOrig = canvasOrig.getContext("2d");
+        ctxOrig.drawImage(this.origImg, 0, 0, this.img.width * this.scaleModal, this.img.height * this.scaleModal);
+
+        // из всего изображения найти только выделенный квадрат/круг
+        const ctxSize = this.previewSize * this.scaleModal;
+        const canvasCut = createElement("canvas");
+        canvasCut.width = this.previewSize * this.scaleModal;
+        canvasCut.height = this.previewSize * this.scaleModal;
+        canvasCut.style.cssText = "position: absolute; z-index: -99; opacity: 0";
+        document.body.append(canvasCut);
+        const ctxCut = canvasCut.getContext("2d");
+        const sx = (imgWrapperCoords.left - imgCoords.left) * this.scaleModal;
+        const sy = (imgWrapperCoords.top - imgCoords.top) * this.scaleModal;
+        if (this.isCircle) {
+            const x = canvasCut.width / 2;
+            const y = canvasCut.height / 2;
+            const radius = Math.min(x, y);
+
+            ctxCut.beginPath();
+            ctxCut.arc(x, y, radius, 0, 2 * Math.PI);
+            ctxCut.closePath();
+            ctxCut.fill();
+            ctxCut.globalCompositeOperation = "source-in";
+            ctxCut.drawImage(canvasOrig, sx, sy, ctxSize, ctxSize, 0, 0, ctxSize, ctxSize);
+        } else {
+            ctxCut.drawImage(canvasOrig, sx, sy, ctxSize, ctxSize, 0, 0, ctxSize, ctxSize);
+        }
+
+        const src = canvasCut.toDataURL("image/png");
+        if (doShow) modal.createImageModal(src);
+
+        canvasOrig.remove();
+        canvasCut.remove();
+        return { src, width: canvasCut.width, height: canvasCut.height, format: "PNG" };
+    }
+}
+
+// инициализация формы
+class Form {
+    constructor(form) {
+        this.submit = this.submit.bind(this);
+
+        this.form = form;
+        this.formSelector = "." + this.form.className.split(" ")[0];
+        this.submitButton = this.form.querySelector(".forms__submit");
+
+        this.form.addEventListener("submit", this.submit);
+        const observer = new MutationObserver(mutlist => {
+            forms_doInit();
+        });
+        observer.observe(this.form, { childList: true });
+    }
+    submit(event) {
+        const formElements = inputParams.filter(inpParam => {
+            let isFormElement = false;
+            if (inpParam.input && inpParam.input.closest)
+                isFormElement = inpParam.input.closest(this.formSelector) === this.form;
+            if (!isFormElement && inpParam.inputs) {
+                inpParam.inputs.forEach(i => {
+                    if (i && i.closest) isFormElement = i.closest(this.formSelector) === this.form;
+                });
+            }
+            return isFormElement;
+        });
+        const invalids = [];
+        formElements.forEach(inpParam => {
+            inpParam.checkCompletion();
+            if (!inpParam.isCompleted) invalids.push(inpParam);
+        });
+        if (invalids.length > 0) event.preventDefault();
+        else {
+            event.preventDefault();
+            window.location.href = window.location.origin + "/profile/forms/send.html";
+        }
+    }
+}
+const form = new Form(document.querySelector(".forms"));
+
+class CreateModalLink {
+    constructor(link) {
+        this.link = link;
+        link.addEventListener("click", this.onClick.bind(this));
+    }
+    onClick(event) {
+        event.preventDefault();
+        if (event.target.getAttribute("id") === "conditions-link") {
+            const title = "Условия направления физическими лицами заявлений в электронном виде в информационно-телекоммуникационной сети «Интернет» на сайте Job1.ru";
+            const content = `
+            <div class="agreement__content">
+                <h3 class="agreement__statement">
+                    Гражданин Российской Федерации <span class="bold">(далее – «Заявитель»)</span>, сайт Job1.ru
+                    <span class="bold">(далее – «Сайт»)</span>
+                    заявление в электронном виде на сайте <span class="bold">(далее – «Заявление»)</span> в
+                    целях получения услуги Сайта,
+                    тем самым понимает, принимает и подтверждает следующее:
+                </h3>
+                <ol class="agreement-list__primary">
+                    <li class="agreement-list__primary-item">
+                        Заявитель подтверждает, что все указанные в Заявлении персональные данные принадлежат
+                        лично Заявителю.
+                    </li>
+                    <li class="agreement-list__primary-item">
+                        Заявитель подтверждает, что он является совершеннолетним гражданином Российской
+                        Федерации, имеет законное право на предоставление Сайту данных, указанных в Заявлении, и
+                        такие данные являются полными и действительными на момент их предоставления Сайту.
+                    </li>
+                    <li class="agreement-list__primary-item">
+                        Заявитель обязуется <span class="underlined">не совершать</span> следующие действия:
+                        <ul class="agreement-list__secondary">
+                            <li class="agreement-list__secondary-item">
+                                Любым способом посредством сайта <a href="https://job1.ru/">https://job1.ru/</a>
+                                размещать, распространять, сохранять, загружать и/или уничтожать материалы
+                                (информацию) в нарушение законодательства Российской Федерации;
+                            </li>
+                            <li class="agreement-list__secondary-item">
+                                Размещать заведомо недостоверную информацию, регистрироваться, используя чужие
+                                персональные данные (персональные данные третьих лиц, а также вымышленных лиц);
+                            </li>
+                            <li class="agreement-list__secondary-item">
+                                Размещать заведомо недостоверную информацию об адресе
+                                фактического проживания, номере(-ах) телефона(-ов), размещать информацию об
+                                адресах электронной почты, права на использование которых отсутствуют у
+                                Заявителя.
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="agreement-list__primary-item">
+                        Заявитель обязуется не нарушать информационную безопасность электронных ресурсов Сайта, не нарушать процедуры регистрации, предусмотренные Сайтом.
+                    </li>
+                    <li class="agreement-list__primary-item">
+                        Сайт прилагает все возможные усилия и предусмотренные законодательством Российской
+                        Федерации меры для того, чтобы избежать несанкционированного использования персональной
+                        информации Заявителя. Заявитель уведомлен и соглашается с тем, что Сайт не несет
+                        ответственности за возможное нецелевое использование персональной информации
+                        пользователей, произошедшее из-за технических неполадок в программном обеспечении,
+                        серверах, компьютерных сетях, находящихся вне контроля Сайта, или в результате
+                        противоправных действий третьих лиц..
+                    </li>
+                    <li class="agreement-list__primary-item">
+                        Заявитель выражает согласие и уполномочивает Сайт предоставлять полностью или
+                        частично персональные данные работодателю (организациям и индивидуальным
+                        предпринимателям) в целях получения от последнего предложение работы.
+                    </li>
+                </ol>
+            </div>
+            `;
+            modal.createBasicModal(title, content);
+            modal.getTitle().classList.add("modal__title--agreement");
+        }
+        if (event.target.getAttribute("id") === "data-processing-link") {
+            const title = "Согласие на обработку персональных данных, применяемое при направлении заявлений в электронном виде в информационно-телекоммуникационной сети «Интернет» на сайте Job1.ru в целях получения услуг (далее – «Согласие»)";
+            const content = `<div class="agreement__content">
+                <p class="agreement__statement">
+                Я, <span class="bold">(далее – «Заявитель»)</span>, свободно, своей волей и в своем интересе
+                даю конкретное,
+                информированное и сознательное согласие сайту job1.ru <span class="bold">(далее -
+                    «Сайт»)</span> на обработку
+                информации, относящейся к моим персональным данным, в том числе: Ф.И.О.; год, месяц, дата; гражданство; пол; адрес: места жительства (только название улицы и номер дома); сведения об образовании, профессии, специальности и квалификации; сведения о занимаемых ранее должностях и стаже работы, места работы; семейное положение; наличие детей; сведения о смене фамилии; фотография; иная, ранее предоставленная Сайту информация; сведения о номерах телефонов, абонентом и/или пользователем которых я являюсь; сведения об адресах электронной почты Заявителя, имени пользователя Заявителя в сети Интернет, данные о созданном на сайте Сайта; метаданные, данные cookie-файлов, cookie-идентификаторы, IP-адреса, сведения о браузере и операционной системе; сведения, полученные от третьих лиц, в том числе государственных органов, государственных информационных систем, единой системы идентификации и аутентификации (ЕСИА), Пенсионного фонда Российской Федерации, в том числе через систему межведомственного электронного взаимодействия (СМЭВ), и/или из сети Интернет, и/или из иных общедоступных источников персональных данных и любую иную информацию, представленную Сайту.
+                </p>
+                <p class="agreement__statement">
+                    Обработка персональных данных может осуществляться с использованием средств автоматизации или без таковых, а также путем смешанной обработки персональных данных, включая сбор, запись, систематизацию, накопление, хранение, уточнение (обновление, изменение), извлечение, использование, передачу (предоставление, доступ), обезличивание, блокирование, удаление, уничтожение персональных данных, в том числе в информационных системах Сайту, и совершение иных действий, предусмотренных Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных».
+                </p>
+                <p class="agreement__statement">
+                    Я даю согласие на обработку своих персональных данных в следующих целях:
+                </p>
+                <ul class="agreement-list__primary">
+                    <li
+                        class="agreement-list__primary-item agreement-list__primary-item--long">
+                        предоставления доступа к моим персональным данным и передача моих персональных данных работодателям и кадровым агентствам в целях потенциального трудоустройства;
+                    </li>
+                    <li class="agreement-list__primary-item agreement-list__primary-item--long">
+                        добавление моих персональных данных в базы данных резюме на Сайтее
+                    </li>
+                </ul>
+                <p class="agreement__statement">
+                    В вышеуказанных целях я согласен на поручение обработки моих контактных данных контрагентам Сайта с обязательным условием соблюдения конфиденциальности таких данных.
+                </p>
+                <p class="agreement__statement">
+                    Банк осуществляет обработку персональных данных Заявителя в течение 3 (трех) лет со дня подачи настоящего Согласия. 
+                </p>
+                <p class="agreement__statement">
+                    Согласие может быть отозвано субъектом персональных данных путем обращения в отделение Банка с заявлением, оформленным в письменной форме.
+                </p>
+                <p class="agreement__statement">
+                    Настоящее Согласие признается мной и Сайтом моим письменным согласием на обработку моих персональных данных, согласно ст. 9 Федерального закона от 27.07.2006 г. №152-ФЗ «О персональных данных».
+                </p>
+                <p class="agreement__statement">
+                    Согласие может быть отозвано субъектом персональных данных путем направления в job1.ru письменного отзыва по адресу электронной почты: <a href="mailto: support@job1.ru">support@job1.ru</a> . В соответствии с п. 12 ст. 10.1 Федерального закона от 27.07.2006 г. № 152-ФЗ «О персональных данных» требование должно включать в себя фамилию, имя, отчество (при наличии), контактную информацию (номер телефона, адрес электронной почты или почтовый адрес), а также перечень персональных данных, обработка которых подлежит прекращению.
+                </p>
+            </div>`;
+            modal.createBasicModal(title, content);
+            modal.getTitle().classList.add("modal__title--agreement");
+        }
+    }
+}
+
+// инициализация полей 
+let inputParams = [];
+// инициализация групп полей
+const groupsParams = [];
+
+const forms_inputSelectors = [
+    { selector: ".add-field", classInstance: AddFields },
+    { selector: "[data-add-group-checkbox]", classInstance: AddFieldsCheckbox },
+    { selector: ".field__input[type='text']:not([class*='field-init'])", classInstance: TextInput },
+    { selector: ".field__input-multi:not([class*='field-init'])", classInstance: TextInputMulti },
+    { selector: ".field__input-multi.field-init--date", classInstance: TextInputDate },
+    { selector: ".field__input-multi.field-init--birthdate", classInstance: TextInputBirthDate },
+    { selector: ".field-tags__input", classInstance: TextInputTags },
+    { selector: ".text-select__input:not([class*='field-init'])", classInstance: TextSelect },
+    { selector: ".field-init--workyear", classInstance: TextSelectWorkYear },
+    { selector: ".field__selection", classInstance: SelectionInput },
+    { selector: ".select:not([class*='field-init'])", classInstance: Select },
+    { selector: ".field-init--select-children", classInstance: SelectChildren },
+    { selector: ".checkbox:not([class*='field-init'])", classInstance: SelectionInput },
+    { selector: ".field-init--check-end-workyear", classInstance: CheckEndWorkYear },
+    { selector: ".load-image", classInstance: LoadImage },
+    { selector: ".range-block", classInstance: Range },
+    { selector: ".create-modal-link", classInstance: CreateModalLink },
+];
+
+function forms_doInit() {
+    setTimeout(() => {
+        inputParams = inputParams.filter(inpParam => {
+            let keepInArray = false;
+            forms_observingNodesKeys.forEach(key => {
+                if (inpParam[key] && inpParam[key].closest && inpParam[key].closest("body"))
+                    keepInArray = true;
+            });
+
+            return keepInArray;
+        });
+
+        // инициализация всех полей, объявленных в forms_inputSelectors
+        forms_inputSelectors.forEach(data => {
+            const elems = Array.from(document.querySelectorAll(data.selector));
+            elems.forEach(elem => {
+                const alreadyInitted = inputParams.find(inpParam => {
+                    let isFindingElem = false;
+                    forms_observingNodesKeys.forEach(key => {
+                        if (inpParam[key] === elem) isFindingElem = true;
+                    });
+                    return isFindingElem;
+                });
+                if (alreadyInitted) return;
+
+                inputParams.push(new data.classInstance(elem));
+            });
+        });
+
+        // инициализация групп полей
+        Array.from(document.querySelectorAll(".forms__fields-group"))
+            .forEach(group => {
+                const alreadyHasParam = groupsParams.find(par => {
+                    if (par) return Object.values(par).includes(group);
+                    return false;
+                });
+                if (!alreadyHasParam) groupsParams.push(new InputGroup(group, inputParams));
+            });
+    }, 0);
+}
+forms_doInit();
+
+// отлавливать изменения документа
+function observeDocumentBodyOnInputs() {
+    const observer = new MutationObserver((mutlist) => {
+        // isException - предотвращает создание бесконечного цикла вызова forms_DoInit()
+        const isException = mutlist.find(mut => mut.target.classList.contains("text-select__options"));
+
+        if (isException) return;
+        setTimeout(() => forms_doInit(), 0);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+}
+observeDocumentBodyOnInputs();
