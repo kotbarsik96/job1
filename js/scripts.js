@@ -266,10 +266,11 @@ class LoginModal extends Modal {
     drawBasicTemplate(type) {
         // type === "signup"|"login"
         let iframeSrc;
+        const origin = window.location.origin + "/";
         switch (type) {
-            case "signup": iframeSrc = "user/signup-frame.html";
+            case "signup": iframeSrc = origin + "user/signup-frame.html";
                 break;
-            case "login": iframeSrc = "user/login-frame.html";
+            case "login": iframeSrc = origin + "user/login-frame.html";
                 break;
         }
         this.basicTemplate = `
@@ -380,7 +381,7 @@ class User {
                 btn.addEventListener("click", () => this.logUser(true));
             });
             this.signUpButtons.forEach(btn => {
-                btn.addEventListener("click", () => this.signUp());
+                btn.addEventListener("click", () => this.signup());
             });
         }
     }
@@ -389,10 +390,31 @@ class User {
         return new Promise(resolve => {
             setTimeout(() => {
                 if (!this.logged) {
-                    const requireUserElems = document.querySelectorAll("[data-require-user]");
-                    requireUserElems.forEach(elem => {
-                        if (elem.dataset.requireUser === "button") elem.setAttribute("disabled", "");
-                    });
+                    setTimeout(() => {
+                        const requireUserElems = document.querySelectorAll("[data-require-user]");
+                        requireUserElems.forEach(elem => {
+                            const args = elem.dataset.requireUser.split(", ");
+
+                            if (args[0] === "button") elem.setAttribute("disabled", "");
+                            if (args[0] === "button-close-icon") {
+                                elem.setAttribute("disabled", "");
+                                const lockIcon = `
+                            <svg class="disabled-elem__lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="1 1.99 11.31 13.79">
+                                <path d="M11.09 7.74H9.98V5.31a3.32 3.32 0 0 0-6.64 0v2.43H2.22C1.55 7.74 1 8.28 1 8.96v5.6c0 .67.55 1.22 1.22 1.22h8.87c.67 0 1.22-.55 1.22-1.22v-5.6a1.2 1.2 0 0 0-1.22-1.22zM4.34 5.31a2.32 2.32 0 0 1 4.64 0v2.43H4.34V5.31z" fill="currentColor"/>
+                            </svg>
+                            `;
+                                elem.insertAdjacentHTML("beforeend", lockIcon);
+                            }
+
+                            if (args[1] === "login" || args[1] === "signup") {
+                                elem.removeAttribute("disabled");
+                                elem.setAttribute("data-disabled", "");
+                                const newElem = elem.cloneNode(true);
+                                elem.replaceWith(newElem);
+                                newElem.addEventListener("click", this[args[1]]);
+                            }
+                        });
+                    }, 100);
                 }
 
                 if (header) header.renderUserInterface();
@@ -400,8 +422,11 @@ class User {
             }, 0);
         });
     }
-    signUp() {
+    signup() {
         loginModal.createBasicModal("signup");
+    }
+    login() {
+        loginModal.createBasicModal("login");
     }
 }
 const user = new User();
@@ -890,12 +915,16 @@ class ScrollShadow {
         this.scrollable.addEventListener("scroll", this.onScroll);
     }
     createShadow(side) {
-        const shadow = createElement("div", `scroll-shadow shadow-${side}`);
+        const shadow = createElement("div", `scroll-shadow scroll-shadow-${side}`);
         this.elem.append(shadow);
         return shadow;
     }
     onScroll() {
-        if (this.scrollable.scrollWidth == this.scrollable.offsetWidth) return;
+        if (this.scrollable.scrollWidth == this.scrollable.offsetWidth) {
+            this.toggleShadow("start", "remove");
+            this.toggleShadow("end", "remove");
+            return;
+        };
 
         const scrolled = this.scrollable.scrollLeft;
         const listWidth = this.scrollable.offsetWidth;
