@@ -294,6 +294,7 @@ class LoginModal extends Modal {
                 <div class="modal__content login-modal__content">
                     <div class="login-modal__scene">
                         <div class="login-modal__scene-image-container">
+                            <div class="login-modal__scene-background-image"></div>
                             <ul class="login-modal__list list">
                                 <li class="login-modal__list-item list__item icon-checkbox">
                                     <b class="login-modal__bold">Получайте выгодные предложения о работе</b>
