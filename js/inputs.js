@@ -28,6 +28,7 @@ class TextInput {
         this.wrapper = this.inpContainer.querySelector(".text-input__wrapper");
         this.autocompleteList = this.inpContainer.querySelector(".text-input__autocomplete");
         this.clearButton = this.inpContainer.querySelector(".text-input__close-icon");
+        if (this.clearButton) this.clearButton.type = "button";
 
         this.toggleClearButton();
         this.input.addEventListener("input", this.toggleClearButton);
@@ -94,6 +95,91 @@ class Dropdown {
     destroy() {
         this.button.removeEventListener("click", this.toggleList);
         document.removeEventListener("click", this.onDocumentClick);
+    }
+}
+class JobsFilter {
+    constructor(filter) {
+        this.filter = observeNodeBeforeInit(filter);
+        setTimeout(() => {
+            const groups = Array.from(this.filter.querySelectorAll(".jobs-filter__dropdown"));
+            // собрать группу, открывающую ее кнопку, ее input'ы с типом checkbox и radio
+            this.groupsData = groups.map(group => {
+                const checkboxes = group.querySelectorAll("input[type='checkbox']");
+                const radio = group.querySelectorAll("input[type='radio']");
+                const inputButtons = Array.from(checkboxes).concat(Array.from(radio));
+                const groupButton = group.querySelector(".jobs-filter__group-button");
+                return { group, inputButtons, groupButton, checkedInputs: [] };
+            });
+            // инициализировать группу (повесить обработчики на radio&checkbox)
+            this.initGroupsData();
+            // инициализировать все input, чтобы записывать количество checked в кнопку показа фильтра
+            this.initAllInputs();
+        }, 250);
+    }
+    initGroupsData() {
+        init = init.bind(this);
+
+        this.groupsData.forEach(data => {
+            init(data);
+            this.setValues(data);
+            data.inputButtons.forEach(btn => {
+                btn.addEventListener("change", () => init(data));
+            });
+        });
+
+        function init(data) {
+            const checkedInputs = data.inputButtons.filter(inp => inp.checked);
+            data.checkedInputs = checkedInputs.filter(inp => !inp.classList.contains("__no-count"));
+            this.setValues(data);
+        }
+    }
+    initAllInputs() {
+        const checkboxes = this.filter.querySelectorAll("input[type='checkbox']");
+        const radio = this.filter.querySelectorAll("input[type='radio']");
+        const inputs = Array.from(checkboxes).concat(Array.from(radio));
+        inputs.forEach(inp => inp.addEventListener("change", this.setFilterShowAmount.bind(this)));
+
+        const filterShowButton = this.filter.querySelector(".jobs-filter__button");
+        if (!filterShowButton) return;
+
+        let badge = filterShowButton.querySelector(".badge");
+        if (!badge) {
+            badge = createElement("span", "jobs-filter__badge badge");
+            filterShowButton.append(badge);
+            const observer = new MutationObserver(() => {
+                if (filterShowButton.classList.contains("__show-more-active"))
+                    badge.classList.add("__removed");
+                else badge.classList.remove("__removed");
+            });
+            observer.observe(filterShowButton, { attributes: true });
+        }
+        this.setFilterShowAmount();
+    }
+    setValues(data) {
+        const checkedAmount = data.checkedInputs.length;
+        let badge = data.groupButton.querySelector(".badge");
+        if (!badge) {
+            badge = createElement("span", "jobs-filter__badge badge");
+            data.groupButton.append(badge);
+        }
+        badge.innerHTML = checkedAmount;
+        if (checkedAmount < 1) badge.classList.add("__removed");
+        else badge.classList.remove("__removed");
+    }
+    setFilterShowAmount() {
+        const filterShowButton = this.filter.querySelector(".jobs-filter__button");
+        if (!filterShowButton) return;
+
+        const checkboxes = Array.from(this.filter.querySelectorAll("input[type='checkbox']"));
+        const radio = Array.from(this.filter.querySelectorAll("input[type='radio']"));
+        const checkedInputs = checkboxes.concat(radio)
+            .filter(inp => inp.checked);
+        const checkedAmount = checkedInputs.length;
+
+        const badge = filterShowButton.querySelector(".badge");
+        if (!badge) return;
+        badge.innerHTML = checkedAmount;
+        if (checkedAmount < 1) badge.classList.add("__removed");
     }
 }
 class JobsSearchForm {
@@ -243,6 +329,7 @@ class PasswordFormElement extends TextFormElement {
 const inputSelectors = [
     { selector: ".text-input", classInstance: TextInput },
     { selector: ".dropdown", classInstance: Dropdown },
+    { selector: ".jobs-filter", classInstance: JobsFilter },
     { selector: ".jobs-search-form", classInstance: JobsSearchForm },
     { selector: ".validation-form", classInstance: ValidationForm },
     { selector: ".form-element--text", classInstance: TextFormElement },

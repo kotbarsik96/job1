@@ -2,6 +2,22 @@
     Здесь находятся основные скрипты (шапка, состояние пользователя - авторизован или нет, методы для инициализации input'ов, полезные data-атрибуты и др.)
 */
 
+// получить название страницы и активировать соответствующие кнопки
+function getPageName() {
+    const pageNameElem = document.querySelector("[data-page-name]");
+    if (!pageNameElem) return;
+
+    const pageName = pageNameElem.dataset.pageName;
+    const elems = Array.from(document.querySelectorAll(`.${pageName}`));
+    elems.forEach(el => {
+        el.classList.add("__page-active");
+    });
+    pageNameElem.removeAttribute("data-page-name");
+
+    return pageName;
+}
+const pageName = getPageName();
+
 if (!String.prototype.trim) {
     (function () {
         String.prototype.trim = function () {
@@ -266,7 +282,7 @@ class LoginModal extends Modal {
     drawBasicTemplate(type) {
         // type === "signup"|"login"
         let iframeSrc;
-        const origin = window.location.origin + "/";
+        const origin = window.location.origin + "/job1/";
         switch (type) {
             case "signup": iframeSrc = origin + "user/signup-frame.html";
                 break;
@@ -389,6 +405,7 @@ class User {
         // задержка нужно для того, чтобы сначала прошла инициализация всех классов, методов и прочих скриптов
         return new Promise(resolve => {
             setTimeout(() => {
+                document.body.dataset.isLoggedin = "true";
                 if (!this.logged) {
                     setTimeout(() => {
                         const requireUserElems = document.querySelectorAll("[data-require-user]");
@@ -424,6 +441,7 @@ class User {
     }
     signup() {
         loginModal.createBasicModal("signup");
+        console.log("Signup");
     }
     login() {
         loginModal.createBasicModal("login");
@@ -639,6 +657,7 @@ class ButtonShowMore {
     }
     toggleElem() {
         const btn = this.input;
+        const btnText = btn.querySelector(".show-more__text");
         const selector = btn.dataset.showMore;
         const elems = Array.from(document.querySelectorAll(selector));
         let elem;
@@ -650,10 +669,19 @@ class ButtonShowMore {
 
         if (elem) {
             const action = elem.classList.contains("__show-more") ? "remove" : "add";
+            btn.classList[action]("__show-more-active");
             elem.classList[action]("__show-more");
 
-            if (action === "add" && this.textOnHide) btn.innerHTML = this.textOnHide;
-            if (action === "remove" && this.textOnShow) btn.innerHTML = this.textOnShow;
+            if (action === "add" && this.textOnHide) {
+                btnText
+                    ? btnText.innerHTML = this.textOnHide
+                    : btn.innerHTML = this.textOnHide;
+            }
+            if (action === "remove" && this.textOnShow) {
+                btnText
+                    ? btnText.innerHTML = this.textOnShow
+                    : btn.innerHTML = this.textOnShow;
+            }
         }
     }
 }
