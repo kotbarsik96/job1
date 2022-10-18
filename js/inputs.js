@@ -149,7 +149,7 @@ class JobsFilter {
             const observer = new MutationObserver(() => {
                 if (filterShowButton.classList.contains("__show-more-active"))
                     badge.classList.add("__removed");
-                else badge.classList.remove("__removed");
+                else if(badge.innerHTML != "0") badge.classList.remove("__removed");
             });
             observer.observe(filterShowButton, { attributes: true });
         }
@@ -173,7 +173,7 @@ class JobsFilter {
         const checkboxes = Array.from(this.filter.querySelectorAll("input[type='checkbox']"));
         const radio = Array.from(this.filter.querySelectorAll("input[type='radio']"));
         const checkedInputs = checkboxes.concat(radio)
-            .filter(inp => inp.checked);
+            .filter(inp => inp.checked && !inp.classList.contains("__no-count"));
         const checkedAmount = checkedInputs.length;
 
         const badge = filterShowButton.querySelector(".badge");
