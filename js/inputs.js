@@ -149,7 +149,7 @@ class JobsFilter {
             const observer = new MutationObserver(() => {
                 if (filterShowButton.classList.contains("__show-more-active"))
                     badge.classList.add("__removed");
-                else if(badge.innerHTML != "0") badge.classList.remove("__removed");
+                else if (badge.innerHTML != "0") badge.classList.remove("__removed");
             });
             observer.observe(filterShowButton, { attributes: true });
         }
@@ -197,6 +197,26 @@ class JobsSearchForm {
             this.proximityContainer.classList.remove("__mobile-hidden");
             this.submitContainer.classList.remove("__mobile-hidden");
         });
+    }
+}
+
+class AlarmDisruptorPill {
+    constructor(container) {
+        this.toggleBox = this.toggleBox.bind(this);
+
+        this.container = observeNodeBeforeInit(container);
+        this.btnShow = this.container.querySelector(".alarm-disruptor-pill__button");
+        this.box = this.container.querySelector(".alarm-disruptor-pill__box");
+        this.btnRequest = this.container.querySelector(".alarm-disruptor-pill__submit");
+        this.btnClose = this.container.querySelector(".alarm-disruptor-pill__close");
+
+        this.btnShow.addEventListener("click", this.toggleBox);
+        this.btnClose.addEventListener("click", this.toggleBox);
+    }
+    toggleBox() {
+        this.box.classList.contains("__removed")
+            ? this.box.classList.remove("__removed")
+            : this.box.classList.add("__removed");
     }
 }
 
@@ -331,6 +351,7 @@ const inputSelectors = [
     { selector: ".dropdown", classInstance: Dropdown },
     { selector: ".jobs-filter", classInstance: JobsFilter },
     { selector: ".jobs-search-form", classInstance: JobsSearchForm },
+    { selector: ".alarm-disruptor-pill", classInstance: AlarmDisruptorPill },
     { selector: ".validation-form", classInstance: ValidationForm },
     { selector: ".form-element--text", classInstance: TextFormElement },
     { selector: ".password-input", classInstance: PasswordFormElement },

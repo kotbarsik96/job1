@@ -821,9 +821,6 @@ class BackToTopButton {
 
         if (window.pageYOffset + windowHeight <= windowHeight) this.hideBtn();
         else this.showBtn();
-
-        if (window.pageYOffset + windowHeight >= parentBottom) this.input.style.position = "absolute";
-        else this.input.style.position = "fixed";
     }
     onClick() {
         window.scrollTo({
