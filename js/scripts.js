@@ -406,7 +406,7 @@ class User {
         // задержка нужно для того, чтобы сначала прошла инициализация всех классов, методов и прочих скриптов
         return new Promise(resolve => {
             setTimeout(() => {
-                document.body.dataset.isLoggedin = "true";
+                if (this.logged) document.body.dataset.isLoggedin = "true";
                 if (!this.logged) {
                     setTimeout(() => {
                         const requireUserElems = document.querySelectorAll("[data-require-user]");
@@ -583,7 +583,7 @@ const observingNodesKeys = [
     "input", "form", "formElement", "elem"
 ];
 
-// Данный метод обязательно вызывается для присваивания в основной элемент, список которых указан в observingNodesKeys (this.input, this.form, ...)
+// Данный метод обязательно вызывается для присваивания в основной элемент, список которых указан в observingNodesKeys (this.input, this.form, ...). Он добавляет MutationObserver к элементу, который, в случае его удаления из document, убирает его из списка inittedInputs
 function observeNodeBeforeInit(node) {
     let observerTarget = node;
     const observer = new MutationObserver((mutlist) => {

@@ -184,7 +184,7 @@ class JobsFilter {
 }
 class JobsSearchForm {
     constructor(form) {
-        this.form = observeNodeBeforeInit(form, true);
+        this.form = observeNodeBeforeInit(form);
         this.keywordsContainer = this.form.querySelector(".jobs-search-form__search-input");
         this.proximityContainer = this.form.querySelector(".jobs-search-form__proximity-container");
         this.submitContainer = this.form.querySelector(".jobs-search-form__submit-group");
