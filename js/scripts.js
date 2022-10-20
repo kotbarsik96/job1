@@ -442,7 +442,6 @@ class User {
     }
     signup() {
         loginModal.createBasicModal("signup");
-        console.log("Signup");
     }
     login() {
         loginModal.createBasicModal("login");
@@ -584,14 +583,9 @@ const observingNodesKeys = [
     "input", "form", "formElement", "elem"
 ];
 
-// в больш-ве случаев нужно пересоздать элемент, чтобы при повторной инициализации на него навесить обработчики заново, а при удалении из документа удалить обработчики. Данный метод обязательно вызывается для присваивания в основной элемент, список которых указан в observingNodesKeys (this.input, this.form, ...)
-// !ЕСЛИ из-за этой функции начинается бесконечная загрузка страницы, то вызывать ее со вторым аргументом в виде true!
-function observeNodeBeforeInit(node, noClone = false) {
+// Данный метод обязательно вызывается для присваивания в основной элемент, список которых указан в observingNodesKeys (this.input, this.form, ...)
+function observeNodeBeforeInit(node) {
     let observerTarget = node;
-    if (noClone == false) {
-        observerTarget = node.cloneNode(true);
-        node.replaceWith(observerTarget);
-    }
     const observer = new MutationObserver((mutlist) => {
         mutlist.forEach(mut => {
             const removedNodes = Array.from(mut.removedNodes);
@@ -641,13 +635,51 @@ function doInit(selectors) {
     }
 }
 
+// функция предназначена для элементов с data-click-closable, должна быть привязана к контексту класса, внутри которого вызывается, либо вызвана с помощью .call|.apply;
+// dataQueries - строка data-click-closable, т.е. запросы вида "720, false, ...", которые функция распарсит и запишет; вызывает callback при нажатии на document, если медиа запрос просит это сделать
+function initDataClickClosable(queries, callback) {
+    queries = queries.split(", ");
+    this.mediaQueries = queries.map(query => {
+        const split = query.split(" ");
+        return { mediaValue: split[0], boolean: split[1] };
+    });
+    this.mediaQueries.forEach(mdq => {
+        onQueryChange = onQueryChange.bind(this);
+
+        const query = window.matchMedia(`(min-width: ${mdq.mediaValue}px)`);
+        onQueryChange();
+        query.addEventListener("change", onQueryChange);
+
+        function onQueryChange() {
+            const isRemoveHandler = mdq.boolean == "true" && !query.matches
+                || mdq.boolean == "false" && query.matches;
+            const isAddHandler = mdq.boolean == "true" && query.matches;
+
+            if (isRemoveHandler)
+                document.removeEventListener("click", callback);
+            if (isAddHandler) document.addEventListener("click", callback);
+        }
+    });
+}
+
+
 // кнопка при нажатии находит элемент по селектору, указанному в data-show-more и присваивает ему класс "__shown-more". Если по селектору найдено несколько элементов, выбирается первый элемент у ближайшего общего родителя
 class ButtonShowMore {
     constructor(btn) {
         this.toggleElem = this.toggleElem.bind(this);
+        this.onDocumentClick = this.onDocumentClick.bind(this);
 
         this.input = observeNodeBeforeInit(btn);
         this.input.addEventListener("click", this.toggleElem);
+        this.inputText = this.input.querySelector(".show-more__text");
+        this.selector = this.input.dataset.showMore;
+
+        const elems = Array.from(document.querySelectorAll(this.selector));
+
+        if (elems.length > 0) {
+            if (elems.length === 1) this.elem = elems[0];
+            if (elems.length > 1) this.elem = findClosestElem(btn, this.selector);
+        }
 
         let textOnToggle = this.input.dataset.showMoreText;
         textOnToggle = textOnToggle ? textOnToggle.split(", ") : textOnToggle;
@@ -655,34 +687,42 @@ class ButtonShowMore {
             this.textOnShow = textOnToggle[0];
             this.textOnHide = textOnToggle[1] || textOnToggle[0];
         }
+
+        if (this.input.hasAttribute("data-click-closable"))
+            initDataClickClosable.call(this, this.input.dataset.clickClosable, this.onDocumentClick);
+    }
+    onDocumentClick(event) {
+        const inputSelector = this.input.className.split(" ")[0];
+        const isTarget =
+            event.target !== this.elem
+            && event.target !== this.input
+            && event.target.closest(inputSelector) !== this.input;
+
+        if (isTarget) this.hideElem();
     }
     toggleElem() {
-        const btn = this.input;
-        const btnText = btn.querySelector(".show-more__text");
-        const selector = btn.dataset.showMore;
-        const elems = Array.from(document.querySelectorAll(selector));
-        let elem;
-
-        if (elems.length > 0) {
-            if (elems.length === 1) elem = elems[0];
-            if (elems.length > 1) elem = findClosestElem(btn, selector);
+        if (this.elem) {
+            this.elem.classList.contains("__show-more")
+                ? this.hideElem()
+                : this.showElem();
         }
-
-        if (elem) {
-            const action = elem.classList.contains("__show-more") ? "remove" : "add";
-            btn.classList[action]("__show-more-active");
-            elem.classList[action]("__show-more");
-
-            if (action === "add" && this.textOnHide) {
-                btnText
-                    ? btnText.innerHTML = this.textOnHide
-                    : btn.innerHTML = this.textOnHide;
-            }
-            if (action === "remove" && this.textOnShow) {
-                btnText
-                    ? btnText.innerHTML = this.textOnShow
-                    : btn.innerHTML = this.textOnShow;
-            }
+    }
+    hideElem() {
+        this.input.classList.remove("__show-more-active");
+        this.elem.classList.remove("__show-more");
+        if (this.textOnHide) {
+            this.inputText
+                ? this.inputText.innerHTML = this.textOnHide
+                : btn.innerHTML = this.textOnHide;
+        }
+    }
+    showElem() {
+        this.input.classList.add("__show-more-active");
+        this.elem.classList.add("__show-more");
+        if (this.textOnShow) {
+            this.inputText
+                ? this.inputText.innerHTML = this.textOnShow
+                : btn.innerHTML = this.textOnShow;
         }
     }
 }
@@ -693,7 +733,7 @@ class DataTitle {
         this.showTitle = this.showTitle.bind(this);
         this.hideTitle = this.hideTitle.bind(this);
 
-        this.elem = observeNodeBeforeInit(elem, true);
+        this.elem = observeNodeBeforeInit(elem);
         this.showingDur = 300;
 
         this.elem.addEventListener("pointerover", this.showTitle);
@@ -817,7 +857,6 @@ class BackToTopButton {
     }
     onScroll() {
         const windowHeight = document.documentElement.clientHeight || window.innerHeight;
-        const parentBottom = getCoords(this.parent).bottom;
 
         if (window.pageYOffset + windowHeight <= windowHeight) this.hideBtn();
         else this.showBtn();
@@ -850,29 +889,8 @@ class Spoiler {
         this.button.addEventListener("click", this.toggle.bind(this));
         this.hide();
 
-        if (this.spoiler.hasAttribute("data-spoiler-click-closable")) {
-            const queries = this.spoiler.dataset.spoilerClickClosable.split(", ");
-            this.mediaQueries = queries.map(query => {
-                const split = query.split(" ");
-                return { mediaValue: split[0], boolean: split[1] };
-            });
-            this.mediaQueries.forEach(mdq => {
-                onQueryChange = onQueryChange.bind(this);
-
-                const query = window.matchMedia(`(min-width: ${mdq.mediaValue}px)`);
-                onQueryChange();
-                query.addEventListener("change", onQueryChange);
-
-                function onQueryChange() {
-                    const isRemoveHandler = mdq.boolean == "true" && !query.matches
-                        || mdq.boolean == "false" && query.matches;
-                    const isAddHandler = mdq.boolean == "true" && query.matches;
-
-                    if (isRemoveHandler)
-                        document.removeEventListener("click", this.onDocumentClick);
-                    if (isAddHandler) document.addEventListener("click", this.onDocumentClick);
-                }
-            });
+        if (this.spoiler.hasAttribute("data-click-closable")) {
+            initDataClickClosable.call(this, this.spoiler.dataset.clickClosable, this.onDocumentClick);
         }
     }
     onDocumentClick(event) {
@@ -924,7 +942,7 @@ class ScrollShadow {
     constructor(elem) {
         this.onScroll = this.onScroll.bind(this);
 
-        this.elem = observeNodeBeforeInit(elem, true);
+        this.elem = observeNodeBeforeInit(elem);
         this.selector = this.elem.dataset.scrollShadow;
         this.scrollable = this.elem.querySelector(this.selector);
         this.items = Array.from(this.scrollable.childNodes).filter(node => node.nodeType != 4);
