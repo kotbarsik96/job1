@@ -628,6 +628,18 @@ function initInput(array, elem, ClassInstance) {
 
 // инициализация всех input по селекторам
 function doInit(selectors) {
+    inittedInputs = inittedInputs.filter(inpParam => {
+        if(!inpParam) return false;
+        if(Object.values(inpParam).length < 1) return false;
+
+        let keepInArray = true;
+        for(let nodeKey of observingNodesKeys) {
+            if(!inpParam[nodeKey]) continue;
+            if(inpParam[nodeKey].closest && !inpParam[nodeKey].closest("body")) 
+            keepInArray = false;
+        }
+        return keepInArray;
+    });
     // selectors == [{ selector: "...", classInstance: ... }]
     for (let selData of selectors) {
         const elems = Array.from(document.querySelectorAll(selData.selector));
