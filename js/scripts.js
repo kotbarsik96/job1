@@ -750,15 +750,14 @@ class DataTitle {
             opacity: 0; 
             font-size: ${fontSize}
         `;
-        const parent = node.parentNode;
-        parent.style.position = "relative";
-        parent.append(titleNode);
+        const alreadyHasTitleNode = node.querySelector(".hover-title");
+        if(!alreadyHasTitleNode) node.append(titleNode);
         setTimeout(() => titleNode.style.opacity = "1", 0);
         node.addEventListener("pointerout", this.hideTitle);
     }
     hideTitle(event) {
         const node = event.target;
-        const titleNode = node.parentNode.querySelector(".hover-title");
+        const titleNode = node.querySelector(".hover-title");
         if (titleNode) {
             titleNode.style.opacity = "0";
             node.removeEventListener("pointerout", this.hideTitle);

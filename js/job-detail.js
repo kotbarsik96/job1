@@ -1,15 +1,26 @@
+// определить, показывать ли вакансию
+function defineJobDetailState() {
+    const jobId = window.location.hash.replace("#", "");
+    console.log(jobId); 
+}
+function jobDetailShowState() {
+
+}
+function jobDetailHideState() {
+
+}
+defineJobDetailState();
+
 // элемент в списке вакансий
 class JobDetailListItem {
     constructor(listItem) {
-        this.setJobDetail = this.setJobDetail.bind(this);
+        this.setJobId = this.setJobId.bind(this);
 
         this.elem = observeNodeBeforeInit(listItem);
-        this.isActive = this.elem.classList.contains("__active");
-
-        if (this.isActive) this.setJobDetail();
+        this.elem.addEventListener("click", this.setJobId);
     }
-    setJobDetail() {
-
+    setJobId(){
+        
     }
 }
 
@@ -25,16 +36,42 @@ class JobDetail {
         this.onContainerScroll = this.onContainerScroll.bind(this);
 
         this.elem = observeNodeBeforeInit(elem);
+        this.closeContainer = this.elem.querySelector(".job-detail__close");
         this.header = this.elem.querySelector(".job-header-m");
         this.container = this.elem.querySelector(".job-detail__container");
+        this.noHideHeaderMedia = window.matchMedia("(min-width: 720px)");
 
         this.container.addEventListener("scroll", this.onContainerScroll);
     }
     onContainerScroll() {
-        if (this.container.scrollTop > this.header.offsetHeight)
+        this.doFixHeader = this.container.scrollTop > this.header.offsetHeight;
+        if (this.doFixHeader) {
             this.header.classList.add("__sticky");
-        else this.header.classList.remove("__sticky");
+            this.closeContainer.classList.add("__visible");
+        }
+        else {
+            this.header.classList.remove("__sticky");
+            this.closeContainer.classList.remove("__visible");
+            this.header.style.removeProperty("top");
+            this.closeContainer.style.removeProperty("top");
+        }
+
+        if (this.noHideHeaderMedia.matches == false) this.hideHeader();
+        this.containerScrolledTop = this.container.scrollTop;
     }
+    hideHeader() {
+        if (!this.doFixHeader) return;
+
+        const isScrolledUp = this.containerScrolledTop < this.container.scrollTop;
+        if (isScrolledUp) {
+            this.header.style.top = "-500px";
+            this.closeContainer.style.top = "-500px";
+        } else {
+            this.header.style.removeProperty("top");
+            this.closeContainer.style.removeProperty("top");
+        }
+    }
+
 }
 
 const jobDetailsSelectors = [
