@@ -33,11 +33,68 @@ class JobDetailState {
         jobDetails.forEach(jd => jd.setHideState());
     }
 }
+// данный экземлпяр класса используется, чтобы выставить элементам на странице состояние показа вакансии (setShowState()) или состояние без показанной вакансии (setHideState). Метод defineState() определяет состояние и саму вакансию на основе хэша в адресной строке (#101, #102, ...)
 const jobDetailState = new JobDetailState();
+
+
+// список вакансий
+class JobsListing {
+    constructor(elem) {
+        this.onJobsSearchSubmit = this.onJobsSearchSubmit.bind(this);
+        this.removeTag = this.removeTag.bind(this);
+
+        this.elem = observeNodeBeforeInit(elem);
+        this.tagsList = this.elem.querySelector(".jobs-filter-buttons__tags");
+        this.filterListItemNames = ["professional-area", "employment-type", "work-experience", "salary"];
+        this.filterInputs = [];
+        this.createdTags = [];
+        this.jobsSearchForm = document.querySelector(".jobs-search-form");
+
+        this.filterListItemNames.forEach(name => {
+            const inputs = document.querySelectorAll(`input[name="${name}"]`);
+            inputs.forEach(inp => this.filterInputs.push(inp));
+        });
+        this.jobsSearchForm.addEventListener("submit", this.onJobsSearchSubmit);
+    }
+    onJobsSearchSubmit(event) {
+        event.preventDefault();
+
+        const checkedFilterInputs = this.filterInputs.filter(inp => {
+            return inp.checked && !inp.classList.contains("__no-count");
+        });
+        checkedFilterInputs.forEach(inp => {
+            const value = inp.value;
+            this.createTag(value);
+        });
+    }
+    createTag(value) {
+        if (this.createdTags.find(tagValue => tagValue === value)) return;
+
+        const tag = createElement("li", "jobs-filter-buttons__tag-item tag");
+        const tagInner = `
+            <div class="tag__text __no-hover">${value}</div>
+            <button class="tag__close icon-close"></button>
+        `;
+        tag.insertAdjacentHTML("afterbegin", tagInner);
+        const removeButton = tag.querySelector(".tag__close");
+        removeButton.addEventListener("click", this.removeTag);
+        this.createdTags.push(value);
+        this.tagsList.append(tag);
+    }
+    removeTag(event) {
+        const tag = event.target.closest(".jobs-filter-buttons__tag-item");
+        tag.remove();
+        event.target.removeEventListener("click", this.removeTag);
+        const value = tag.querySelector(".tag__text").innerHTML;
+        this.createdTags = this.createdTags.filter(tagValue => tagValue !== value);
+    }
+}
 
 // элемент в списке вакансий
 class JobDetailListItem {
     constructor(listItem) {
+        this.onLinkClick = this.onLinkClick.bind(this);
+
         this.elem = observeNodeBeforeInit(listItem);
         this.jobId = this.elem.dataset.jobId;
 
@@ -48,7 +105,13 @@ class JobDetailListItem {
         const links = this.elem.querySelectorAll("a");
         links.forEach(link => {
             link.href = `#${this.jobId}`;
+            link.addEventListener("click", this.onLinkClick);
         });
+    }
+    onLinkClick(event) {
+        event.preventDefault();
+        const id = event.target.getAttribute("href");
+        if (id) window.location.href = window.location.href.replace(/#.*/, "") + id;
     }
     setState() {
         const chosenJobId = window.location.hash.replace("#", "");
@@ -64,6 +127,7 @@ class AlarmDisruptorListItem {
     }
 }
 
+// детали вакансии
 class JobDetail {
     constructor(elem) {
         this.onContainerScroll = this.onContainerScroll.bind(this);
@@ -116,7 +180,7 @@ class JobDetail {
         this.createLoadingOverlay();
         fetch("/job1/json/jobs.json").then(response => {
             response.json().then(getData);
-        }).finally(() => setTimeout(this.removeLoadingOverlay, 1500));
+        }).finally(this.removeLoadingOverlay);
 
         function getData(data) {
             data = data[this.jobId];
@@ -358,6 +422,7 @@ class JobDetail {
 }
 
 const jobDetailsSelectors = [
+    { selector: ".jobs-search__listing", classInstance: JobsListing },
     { selector: ".jobs-list__item:not(.jobs-list__alarm-disruptor)", classInstance: JobDetailListItem },
     { selector: ".jobs-list__alarm-disruptor", classInstance: AlarmDisruptorListItem },
     { selector: ".jobs-search__detail", classInstance: JobDetail },

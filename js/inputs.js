@@ -2,20 +2,6 @@
     Здесь находятся классы input'ов с их инициализацией (которые происходят с помощью методов из scripts.js, поэтому этот скрипт ОБЯЗАТЕЛЬНО должен быть подключен ПОСЛЕ scripts.js)
 */
 
-function preventButtonsDefault() {
-    const exceptions = ["submit-button"];
-
-    const buttons = document.querySelectorAll("button");
-    buttons.forEach(btn => {
-        exceptions.forEach(exc => {
-            if (btn.classList.contains(exc)) return;
-
-            btn.addEventListener("click", (e) => e.preventDefault())
-        });
-    });
-}
-preventButtonsDefault();
-
 /* =============================__ОБЫЧНЫЕ INPUT__===================================== */
 
 class TextInput {
@@ -203,20 +189,27 @@ class JobsSearchForm {
 class AlarmDisruptorPill {
     constructor(container) {
         this.toggleBox = this.toggleBox.bind(this);
+        this.submitAlarm = this.submitAlarm.bind(this);
 
         this.container = observeNodeBeforeInit(container);
         this.btnShow = this.container.querySelector(".alarm-disruptor-pill__button");
         this.box = this.container.querySelector(".alarm-disruptor-pill__box");
-        this.btnRequest = this.container.querySelector(".alarm-disruptor-pill__submit");
+        this.btnSubmit = this.container.querySelector(".alarm-disruptor-pill__submit");
         this.btnClose = this.container.querySelector(".alarm-disruptor-pill__close");
 
         this.btnShow.addEventListener("click", this.toggleBox);
         this.btnClose.addEventListener("click", this.toggleBox);
+        this.btnSubmit.addEventListener("click", this.submitAlarm);
     }
     toggleBox() {
         this.box.classList.contains("__removed")
             ? this.box.classList.remove("__removed")
             : this.box.classList.add("__removed");
+    }
+    submitAlarm() {
+        const inputs = Array.from(this.container.querySelectorAll("input"));
+        if (inputs.find(inp => inp.checked))
+            this.container.classList.add("__removed");
     }
 }
 
@@ -365,7 +358,6 @@ function observeDocumentBodyOnInputs() {
         if (isRepeating) return;
 
         doInit(inputSelectors);
-        preventButtonsDefault();
     });
     observer.observe(document.body, { childList: true, subtree: true });
 }
