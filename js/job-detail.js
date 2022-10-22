@@ -67,6 +67,9 @@ class AlarmDisruptorListItem {
 class JobDetail {
     constructor(elem) {
         this.onContainerScroll = this.onContainerScroll.bind(this);
+        this.removeLoadingOverlay = this.removeLoadingOverlay.bind(this);
+        this.createLoadingOverlay = this.createLoadingOverlay.bind(this);
+        this.onTabBarClick = this.onTabBarClick.bind(this);
 
         this.elem = observeNodeBeforeInit(elem);
         this.jobDetail = this.elem.querySelector(".job-detail");
@@ -75,42 +78,77 @@ class JobDetail {
         this.container = this.elem.querySelector(".job-detail__container");
         this.noHideHeaderMedia = window.matchMedia("(min-width: 720px)");
         this.emptyState = this.elem.querySelector(".job-empty-state");
+        this.loadingOverlay = this.elem.querySelector(".jobs-search__detail-loading");
 
         this.container.addEventListener("scroll", this.onContainerScroll);
         this.drawJobDetailContent();
         this.closeButton.addEventListener("click", jobDetailState.setHideState);
     }
+    arrayToString(arr, doWrap = false) {
+        // doWrap = false|{ tagName: "...", className: "..." }
+        const strings = arr.toString().split(",");
+        if (!doWrap) return strings.join(", ");
+
+        let wrapped = ``;
+        for (let substr of strings) {
+            wrapped += `<${doWrap.tagName} class="${doWrap.className || ""}">${substr}</${doWrap.tagName}>`
+        }
+        return wrapped;
+    }
+    createLoadingOverlay() {
+        this.loadingOverlay.classList.remove("__removed");
+        if (this.loadingOverlay.querySelector(".loading-overlay__dot")) return;
+        const innerHTML = `
+        <div class="loading-overlay__ellipsis">
+            <span class="loading-overlay__dot"></span>
+            <span class="loading-overlay__dot"></span>
+            <span class="loading-overlay__dot"></span>
+        </div>`;
+        this.loadingOverlay.insertAdjacentHTML("afterbegin", innerHTML);
+    }
+    removeLoadingOverlay() {
+        this.loadingOverlay.classList.add("__removed");
+        this.loadingOverlay.innerHTML = "";
+    }
     drawJobDetailContent() {
-        this.contentTemplate = `
+        getData = getData.bind(this);
+
+        this.createLoadingOverlay();
+        fetch("/job1/json/jobs.json").then(response => {
+            response.json().then(getData);
+        }).finally(() => setTimeout(this.removeLoadingOverlay, 1500));
+
+        function getData(data) {
+            data = data[this.jobId];
+            if (!data) return;
+
+            this.contentTemplate = `
             <div class="job-detail__content">
                 <div class="job-header-m">
                     <div class="job-header-m__info">
                         <h1 class="job-header-m__job-title">
-                            Ведущий инженер-механик
+                            ${data.title}
                         </h1>
-                        <div class="job-header-m__meta-container"
-                            data-scroll-shadow=".job-header-m__meta-list">
-                            <ul class="job-header-m__meta-list">
-                                <li
-                                    class="job-header-m__meta-item  icon-building-with-tree">
-                                    <a class="job-header-m__company-link link" href="#">
-                                        Сормовская Фабрика
-                                    </a>
-                                </li>
-                                <li class="job-header-m__meta-item  icon-location">
-                                    Нижний Новгород
-                                </li>
-                                <li class="job-header-m__meta-item  icon-clock-arrow">
-                                    Полная занятость, частичная занятость
-                                </li>
-                                <li class="job-header-m__meta-item  icon-portfolio">
-                                    С опытом работы
-                                </li>
-                                <li class="job-header-m__meta-item icon-calendar-empty">
-                                    19.10.2022
-                                </li>
-                            </ul>
-                        </div>
+                        <ul class="job-header-m__meta-list">
+                            <li
+                                class="job-header-m__meta-item  icon-building-with-tree">
+                                <a class="job-header-m__company-link link" href="#">
+                                    ${data.employer}
+                                </a>
+                            </li>
+                            <li class="job-header-m__meta-item  icon-location">
+                                ${this.arrayToString(data.location)}
+                            </li>
+                            <li class="job-header-m__meta-item  icon-clock-arrow">
+                                ${this.arrayToString(data["employment-type"])}
+                            </li>
+                            <li class="job-header-m__meta-item  icon-portfolio">
+                                ${data.expierence}
+                            </li>
+                            <li class="job-header-m__meta-item icon-calendar-empty">
+                                ${data.date}
+                            </li>
+                        </ul>
                     </div>
                     <div class="job-header-m__actions">
                         <div class="job-header-m__action job-header-m__print ">
@@ -231,131 +269,50 @@ class JobDetail {
                 <div class="job-detail__tab-bar">
                     <ul class="job-detail__tab-bar-list">
                         <li class="job-detail__tab-bar-item">
-                            <button class="job-detail__tab-bar-button __active"
-                                aria-label="Показать информацию о вакансии">
+                            <button class="job-detail__tab-bar-button"
+                                aria-label="Показать информацию о вакансии" data-tabbar-job="job-data">
                                 Вакансия
                             </button>
                         </li>
                         <li class="job-detail__tab-bar-item">
                             <button class="job-detail__tab-bar-button"
-                                aria-label="Показать информацию о работодателе">
+                                aria-label="Показать информацию о работодателе" data-tabbar-job="employer-data">
                                 О работодателе
                             </button>
                         </li>
                     </ul>
-                    <button class="job-detail__tab-bar-print">
+                    <button class="job-detail__tab-bar-print icon-printer">
                         Распечатать
                     </button>
                 </div>
                 <div class="job-content">
-                    <p>
-                        Повседневная практика показывает, что реализация намеченных плановых
-                        заданий влечет за собой процесс внедрения и модернизации
-                        существенных финансовых и административных условий. Товарищи! новая
-                        модель организационной деятельности позволяет выполнять важные
-                        задания по разработке направлений прогрессивного развития. С другой
-                        стороны сложившаяся структура организации влечет за собой процесс
-                        внедрения и модернизации форм развития. Повседневная практика
-                        показывает, что дальнейшее развитие различных форм деятельности
-                        обеспечивает широкому кругу (специалистов) участие в формировании
-                        системы обучения кадров, соответствует насущным потребностям.
-                        Разнообразный и богатый опыт консультация с широким активом играет
-                        важную роль в формировании систем массового участия. Товарищи!
-                        реализация намеченных плановых заданий в значительной степени
-                        обуславливает создание системы обучения кадров, соответствует
-                        насущным потребностям.
-                    </p>
-                    <p>
-                        Повседневная практика показывает, что реализация намеченных плановых
-                        заданий влечет за собой процесс внедрения и модернизации
-                        существенных финансовых и административных условий. Товарищи! новая
-                        модель организационной деятельности позволяет выполнять важные
-                        задания по разработке направлений прогрессивного развития. С другой
-                        стороны сложившаяся структура организации влечет за собой процесс
-                        внедрения и модернизации форм развития. Повседневная практика
-                        показывает, что дальнейшее развитие различных форм деятельности
-                        обеспечивает широкому кругу (специалистов) участие в формировании
-                        системы обучения кадров, соответствует насущным потребностям.
-                        Разнообразный и богатый опыт консультация с широким активом играет
-                        важную роль в формировании систем массового участия. Товарищи!
-                        реализация намеченных плановых заданий в значительной степени
-                        обуславливает создание системы обучения кадров, соответствует
-                        насущным потребностям.
-                    </p>
-                    <p>
-                        Повседневная практика показывает, что реализация намеченных плановых
-                        заданий влечет за собой процесс внедрения и модернизации
-                        существенных финансовых и административных условий. Товарищи! новая
-                        модель организационной деятельности позволяет выполнять важные
-                        задания по разработке направлений прогрессивного развития. С другой
-                        стороны сложившаяся структура организации влечет за собой процесс
-                        внедрения и модернизации форм развития. Повседневная практика
-                        показывает, что дальнейшее развитие различных форм деятельности
-                        обеспечивает широкому кругу (специалистов) участие в формировании
-                        системы обучения кадров, соответствует насущным потребностям.
-                        Разнообразный и богатый опыт консультация с широким активом играет
-                        важную роль в формировании систем массового участия. Товарищи!
-                        реализация намеченных плановых заданий в значительной степени
-                        обуславливает создание системы обучения кадров, соответствует
-                        насущным потребностям.
-                    </p>
-                    <p>
-                        Повседневная практика показывает, что реализация намеченных плановых
-                        заданий влечет за собой процесс внедрения и модернизации
-                        существенных финансовых и административных условий. Товарищи! новая
-                        модель организационной деятельности позволяет выполнять важные
-                        задания по разработке направлений прогрессивного развития. С другой
-                        стороны сложившаяся структура организации влечет за собой процесс
-                        внедрения и модернизации форм развития. Повседневная практика
-                        показывает, что дальнейшее развитие различных форм деятельности
-                        обеспечивает широкому кругу (специалистов) участие в формировании
-                        системы обучения кадров, соответствует насущным потребностям.
-                        Разнообразный и богатый опыт консультация с широким активом играет
-                        важную роль в формировании систем массового участия. Товарищи!
-                        реализация намеченных плановых заданий в значительной степени
-                        обуславливает создание системы обучения кадров, соответствует
-                        насущным потребностям.
-                    </p>
-                    <p>
-                        Повседневная практика показывает, что реализация намеченных плановых
-                        заданий влечет за собой процесс внедрения и модернизации
-                        существенных финансовых и административных условий. Товарищи! новая
-                        модель организационной деятельности позволяет выполнять важные
-                        задания по разработке направлений прогрессивного развития. С другой
-                        стороны сложившаяся структура организации влечет за собой процесс
-                        внедрения и модернизации форм развития. Повседневная практика
-                        показывает, что дальнейшее развитие различных форм деятельности
-                        обеспечивает широкому кругу (специалистов) участие в формировании
-                        системы обучения кадров, соответствует насущным потребностям.
-                        Разнообразный и богатый опыт консультация с широким активом играет
-                        важную роль в формировании систем массового участия. Товарищи!
-                        реализация намеченных плановых заданий в значительной степени
-                        обуславливает создание системы обучения кадров, соответствует
-                        насущным потребностям.
-                    </p>
-                    <p>
-                        Повседневная практика показывает, что реализация намеченных плановых
-                        заданий влечет за собой процесс внедрения и модернизации
-                        существенных финансовых и административных условий. Товарищи! новая
-                        модель организационной деятельности позволяет выполнять важные
-                        задания по разработке направлений прогрессивного развития. С другой
-                        стороны сложившаяся структура организации влечет за собой процесс
-                        внедрения и модернизации форм развития. Повседневная практика
-                        показывает, что дальнейшее развитие различных форм деятельности
-                        обеспечивает широкому кругу (специалистов) участие в формировании
-                        системы обучения кадров, соответствует насущным потребностям.
-                        Разнообразный и богатый опыт консультация с широким активом играет
-                        важную роль в формировании систем массового участия. Товарищи!
-                        реализация намеченных плановых заданий в значительной степени
-                        обуславливает создание системы обучения кадров, соответствует
-                        насущным потребностям.
-                    </p>
-
+                    ${this.arrayToString(data["job-data"], { tagName: "p" })}
                 </div>
             </div>
-        `;
-        this.container.innerHTML = this.contentTemplate;
-        this.header = this.elem.querySelector(".job-header-m");
+            `;
+            this.container.innerHTML = this.contentTemplate;
+            this.jobData = data;
+            this.header = this.elem.querySelector(".job-header-m");
+            this.jobContent = this.container.querySelector(".job-content");
+            this.initTabBarButtons();
+        }
+    }
+    initTabBarButtons() {
+        this.tabBarButtons = this.container.querySelectorAll(".job-detail__tab-bar-button");
+        this.onTabBarClick(null, this.tabBarButtons[0]);
+        this.tabBarButtons.forEach(btn => btn.addEventListener("click", this.onTabBarClick));
+    }
+    onTabBarClick(event, node) {
+        const btn = event ? event.target : node;
+        const tabBarValue = btn.dataset.tabbarJob;
+
+        this.tabBarButtons.forEach(btn => btn.classList.remove("__active"));
+        btn.classList.add("__active");
+        this.currentTabBar = tabBarValue;
+
+        this.jobContent.innerHTML = "";
+        const insertToJobContent = this.arrayToString(this.jobData[tabBarValue], { tagName: "p" }) || "";
+        this.jobContent.insertAdjacentHTML("afterbegin", insertToJobContent);
     }
     onContainerScroll() {
         this.doFixHeader = this.container.scrollTop > this.header.offsetHeight;
@@ -388,6 +345,7 @@ class JobDetail {
     setShowState() {
         this.jobDetail.classList.add("job-detail--shown");
         this.emptyState.classList.add("__removed");
+        this.jobId = window.location.hash.replace("#", "");
         this.drawJobDetailContent();
         this.closeContainer.style.removeProperty("top");
     }
