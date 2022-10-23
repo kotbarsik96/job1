@@ -44,12 +44,23 @@ class JobsListing {
         this.removeTag = this.removeTag.bind(this);
 
         this.elem = observeNodeBeforeInit(elem);
+        // блоки внутри jobs-listing
+        this.title = this.elem.querySelector(".jobs-search-list__title");
+        this.emptyResult = this.elem.querySelector(".jobs-search-list__empty-result");
+        this.infoBox = this.elem.querySelector(".jobs-search-list__info-box");
+        this.loadMore = this.elem.querySelector(".more-jobs");
         this.tagsList = this.elem.querySelector(".jobs-filter-buttons__tags");
+        // блоки фильтра вверху страницы
+        this.companySearch = document.querySelector("input[name='keywords']");
+        this.locationSearch = document.querySelector("input[name='locations']");
+        // остальное
         this.filterListItemNames = ["professional-area", "employment-type", "work-experience", "salary"];
         this.filterInputs = [];
         this.createdTags = [];
         this.jobsSearchForm = document.querySelector(".jobs-search-form");
 
+        this.emptyResult.classList.add("__removed");
+        this.infoBox.classList.add("__removed");
         this.filterListItemNames.forEach(name => {
             const inputs = document.querySelectorAll(`input[name="${name}"]`);
             inputs.forEach(inp => this.filterInputs.push(inp));
@@ -64,13 +75,25 @@ class JobsListing {
         });
         checkedFilterInputs.forEach(inp => {
             const value = inp.value;
-            this.createTag(value);
+            const name = inp.name;
+            this.createTag(value, name);
         });
+
+        const keywords = this.companySearch.value.trim();
+        const location = this.locationSearch.value.trim();
+        if (!keywords && !location && checkedFilterInputs.length < 1)
+            this.title.innerHTML = "Текущие вакансии";
+        else if (!keywords && !location) this.title.innerHTML = "2 вакансии";
+        else if (keywords && location) this.title.innerHTML = `Вакансии ${keywords} в ${location}`;
+        else this.title.innerHTML =
+            `Вакансии ${keywords ? keywords : ""} ${location ? "в" : ""} ${location ? location : ""}`;
     }
-    createTag(value) {
-        if (this.createdTags.find(tagValue => tagValue === value)) return;
+    createTag(value, name) {
+        if (this.createdTags.find(tagData => tagData.value === value && tagData.name === name))
+            return;
 
         const tag = createElement("li", "jobs-filter-buttons__tag-item tag");
+        tag.dataset.inputName = name;
         const tagInner = `
             <div class="tag__text __no-hover">${value}</div>
             <button class="tag__close icon-close"></button>
@@ -78,7 +101,7 @@ class JobsListing {
         tag.insertAdjacentHTML("afterbegin", tagInner);
         const removeButton = tag.querySelector(".tag__close");
         removeButton.addEventListener("click", this.removeTag);
-        this.createdTags.push(value);
+        this.createdTags.push({ value, name });
         this.tagsList.append(tag);
     }
     removeTag(event) {
@@ -86,15 +109,36 @@ class JobsListing {
         tag.remove();
         event.target.removeEventListener("click", this.removeTag);
         const value = tag.querySelector(".tag__text").innerHTML;
-        this.createdTags = this.createdTags.filter(tagValue => tagValue !== value);
+        const name = tag.dataset.inputName;
+        this.createdTags = this.createdTags.filter(tagData => {
+            return tagData.value !== value && tagData.name !== name;
+        });
+        Array.from(document.querySelectorAll((`input[name="${name}"]`)))
+            .filter(i => i.value == value)
+            .forEach(i => {
+                if (i.getAttribute("type") == "radio") setUncheckedRadio.call(this, i);
+                if (i.getAttribute("type") == "checkbox") setUncheckedCheckbox.call(this, i);
+            });
+        function setUncheckedRadio(input) {
+            const noCountRelative = Array.from(document.querySelectorAll(`input[name="${input.name}"]`))
+                .find(inp => inp.classList.contains("__no-count"));
+            if (noCountRelative) {
+                input.checked = false;
+                noCountRelative.checked = true;
+                noCountRelative.dispatchEvent(new Event("change"));
+                input.dispatchEvent(new Event("checked"));
+            }
+        }
+        function setUncheckedCheckbox(input) {
+            input.checked = false;
+            input.dispatchEvent(new Event("change"));
+        }
     }
 }
 
 // элемент в списке вакансий
 class JobDetailListItem {
     constructor(listItem) {
-        this.onLinkClick = this.onLinkClick.bind(this);
-
         this.elem = observeNodeBeforeInit(listItem);
         this.jobId = this.elem.dataset.jobId;
 
@@ -104,14 +148,8 @@ class JobDetailListItem {
     setLinksId() {
         const links = this.elem.querySelectorAll("a");
         links.forEach(link => {
-            link.href = `#${this.jobId}`;
-            link.addEventListener("click", this.onLinkClick);
+            if (link.getAttribute("href") == "#") link.href = `#${this.jobId}`;
         });
-    }
-    onLinkClick(event) {
-        event.preventDefault();
-        const id = event.target.getAttribute("href");
-        if (id) window.location.href = window.location.href.replace(/#.*/, "") + id;
     }
     setState() {
         const chosenJobId = window.location.hash.replace("#", "");
@@ -178,7 +216,7 @@ class JobDetail {
         getData = getData.bind(this);
 
         this.createLoadingOverlay();
-        fetch("/job1/json/jobs.json").then(response => {
+        fetch("/json/jobs.json").then(response => {
             response.json().then(getData);
         }).finally(this.removeLoadingOverlay);
 
