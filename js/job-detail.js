@@ -53,6 +53,7 @@ class JobsListing {
         // блоки фильтра вверху страницы
         this.companySearch = document.querySelector("input[name='keywords']");
         this.locationSearch = document.querySelector("input[name='locations']");
+        this.radiusInputs = Array.from(document.querySelectorAll("input[name='proximity-radius']"));
         // остальное
         this.filterListItemNames = ["professional-area", "employment-type", "work-experience", "salary"];
         this.filterInputs = [];
@@ -70,23 +71,31 @@ class JobsListing {
     onJobsSearchSubmit(event) {
         event.preventDefault();
 
-        const checkedFilterInputs = this.filterInputs.filter(inp => {
+        this.checkedFilterInputs = this.filterInputs.filter(inp => {
             return inp.checked && !inp.classList.contains("__no-count");
         });
-        checkedFilterInputs.forEach(inp => {
+        this.checkedFilterInputs.forEach(inp => {
             const value = inp.value;
             const name = inp.name;
             this.createTag(value, name);
         });
 
+        this.setTitleText();
+    }
+    setTitleText() {
         const keywords = this.companySearch.value.trim();
         const location = this.locationSearch.value.trim();
-        if (!keywords && !location && checkedFilterInputs.length < 1)
+        const radiusInput = this.radiusInputs.find(inp => inp.checked);
+
+        if (!keywords && !location && !radiusInput && this.checkedFilterInputs.length < 1)
             this.title.innerHTML = "Текущие вакансии";
-        else if (!keywords && !location) this.title.innerHTML = "2 вакансии";
-        else if (keywords && location) this.title.innerHTML = `Вакансии ${keywords} в ${location}`;
-        else this.title.innerHTML =
-            `Вакансии ${keywords ? keywords : ""} ${location ? "в" : ""} ${location ? location : ""}`;
+        else if (!keywords && !location && !radiusInput) this.title.innerHTML = "2 вакансии";
+        else {
+            const text = `Вакансии ${keywords ? keywords : ""} ${location ? "в г." : ""} ${location ? location : ""}`;
+            if (!radiusInput) this.title.innerHTML = text;
+            if (radiusInput) this.title.innerHTML = 
+                `${text} ${radiusInput.value ? "в радиусе" : ""} ${radiusInput.value ? radiusInput.value : ""}`
+        }
     }
     createTag(value, name) {
         if (this.createdTags.find(tagData => tagData.value === value && tagData.name === name))
@@ -111,13 +120,15 @@ class JobsListing {
         const value = tag.querySelector(".tag__text").innerHTML;
         const name = tag.dataset.inputName;
         this.createdTags = this.createdTags.filter(tagData => {
-            return tagData.value !== value && tagData.name !== name;
+            if(tagData.value === value && tagData.name === name) return false;
+            return true;
         });
         Array.from(document.querySelectorAll((`input[name="${name}"]`)))
             .filter(i => i.value == value)
             .forEach(i => {
                 if (i.getAttribute("type") == "radio") setUncheckedRadio.call(this, i);
                 if (i.getAttribute("type") == "checkbox") setUncheckedCheckbox.call(this, i);
+                setTimeout(() => this.jobsSearchForm.dispatchEvent(new Event("submit")), 100);
             });
         function setUncheckedRadio(input) {
             const noCountRelative = Array.from(document.querySelectorAll(`input[name="${input.name}"]`))
@@ -200,6 +211,7 @@ class JobDetail {
     createLoadingOverlay() {
         this.loadingOverlay.classList.remove("__removed");
         if (this.loadingOverlay.querySelector(".loading-overlay__dot")) return;
+
         const innerHTML = `
         <div class="loading-overlay__ellipsis">
             <span class="loading-overlay__dot"></span>
@@ -216,7 +228,7 @@ class JobDetail {
         getData = getData.bind(this);
 
         this.createLoadingOverlay();
-        fetch("/json/jobs.json").then(response => {
+        fetch("/job1/json/jobs.json").then(response => {
             response.json().then(getData);
         }).finally(this.removeLoadingOverlay);
 
@@ -357,6 +369,7 @@ class JobDetail {
                         </div>
                         <div class="job-header-m__action job-header-m__watchlist">
                             <button
+                                data-changing-button="classList='icon-star:-icon-star-full', contentContainer='.jobs-list__user-button-text', content='В избранное:-В избранном'"
                                 class="job-header-m__button button button--transparent icon-star icon--margin">
                                 В избранное
                             </button>

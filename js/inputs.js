@@ -52,14 +52,18 @@ class Dropdown {
     constructor(container) {
         this.toggleList = this.toggleList.bind(this);
         this.onDocumentClick = this.onDocumentClick.bind(this);
+        this.onRadioChange = this.onRadioChange.bind(this);
 
         this.input = observeNodeBeforeInit(container);
         this.button = this.input.querySelector(".dropdown__button");
         this.list = this.input.querySelector(".dropdown__list");
+        this.radioButtons = Array.from(this.list.querySelectorAll("input[type='radio']"));
+        this.text = this.input.querySelector(".dropdown__text");
 
         this.toggleList(false);
         this.button.addEventListener("click", this.toggleList);
         document.addEventListener("click", this.onDocumentClick);
+        this.radioButtons.forEach(inp => inp.addEventListener("change", this.onRadioChange));
     }
     toggleList(show = "define") {
         if (!this.button.disabled) {
@@ -81,6 +85,11 @@ class Dropdown {
     destroy() {
         this.button.removeEventListener("click", this.toggleList);
         document.removeEventListener("click", this.onDocumentClick);
+    }
+    onRadioChange(event){
+        const inp = event.target;
+        const value = inp.value;
+        this.text.innerHTML = value;
     }
 }
 class JobsFilter {
@@ -170,19 +179,31 @@ class JobsFilter {
 }
 class JobsSearchForm {
     constructor(form) {
+        this.onLocationInput = this.onLocationInput.bind(this);
+
         this.form = observeNodeBeforeInit(form);
         this.keywordsContainer = this.form.querySelector(".jobs-search-form__search-input");
         this.proximityContainer = this.form.querySelector(".jobs-search-form__proximity-container");
+        this.radiusContainer = this.form.querySelector(".jobs-search-form__proximity");
         this.submitContainer = this.form.querySelector(".jobs-search-form__submit-group");
-        this.keywordsInput = this.keywordsContainer.querySelector(".text-input__input");
+        this.keywordsInput = this.keywordsContainer.querySelector("#keywords");
+        this.locationInput = this.proximityContainer.querySelector("#locations");
+        this.radiusButton = this.radiusContainer.querySelector(".dropdown__button");
 
         this.initMobileHiding();
+        this.onLocationInput();
+        this.locationInput.addEventListener("input", this.onLocationInput);
     }
     initMobileHiding() {
         this.keywordsInput.addEventListener("focus", () => {
             this.proximityContainer.classList.remove("__mobile-hidden");
             this.submitContainer.classList.remove("__mobile-hidden");
         });
+    }
+    onLocationInput(){
+        const value = this.locationInput.value.trim();
+        if(value.length < 1) this.radiusButton.setAttribute("disabled", "");
+        else this.radiusButton.removeAttribute("disabled");
     }
 }
 

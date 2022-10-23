@@ -629,14 +629,14 @@ function initInput(array, elem, ClassInstance) {
 // инициализация всех input по селекторам
 function doInit(selectors) {
     inittedInputs = inittedInputs.filter(inpParam => {
-        if(!inpParam) return false;
-        if(Object.values(inpParam).length < 1) return false;
+        if (!inpParam) return false;
+        if (Object.values(inpParam).length < 1) return false;
 
         let keepInArray = true;
-        for(let nodeKey of observingNodesKeys) {
-            if(!inpParam[nodeKey]) continue;
-            if(inpParam[nodeKey].closest && !inpParam[nodeKey].closest("body")) 
-            keepInArray = false;
+        for (let nodeKey of observingNodesKeys) {
+            if (!inpParam[nodeKey]) continue;
+            if (inpParam[nodeKey].closest && !inpParam[nodeKey].closest("body"))
+                keepInArray = false;
         }
         return keepInArray;
     });
@@ -763,7 +763,7 @@ class DataTitle {
             font-size: ${fontSize}
         `;
         const alreadyHasTitleNode = node.querySelector(".hover-title");
-        if(!alreadyHasTitleNode) node.append(titleNode);
+        if (!alreadyHasTitleNode) node.append(titleNode);
         setTimeout(() => titleNode.style.opacity = "1", 0);
         node.addEventListener("pointerout", this.hideTitle);
     }
@@ -1003,6 +1003,75 @@ class ScrollShadow {
     }
 }
 
+// изменяемое состояние кнопки по нажатию
+class ChangingButton {
+    constructor(btn) {
+        this.changeState = this.changeState.bind(this);
+
+        this.input = observeNodeBeforeInit(btn);
+        this.data = this.input.dataset.changingButton;
+
+        const classListStr = this.data.match(/classList='.*?'/);
+        const contentContainerStr = this.data.match(/contentContainer='.*?'/);
+        const contentStr = this.data.match(/content='.*?'/);
+        const params = {
+            classList: classListStr
+                ? classListStr[0].replace("classList=", "").replace(/'/g, "")
+                : null,
+            contentContainer: contentContainerStr
+                ? contentContainerStr[0].replace("contentContainer=", "").replace(/'/g, "")
+                : null,
+            content: contentStr
+                ? contentStr[0].replace("content=", "").replace(/'/g, "")
+                : null
+        }
+        this.contentContainer = this.input.querySelector(params.contentContainer) || this.input;
+        this.originalState = {
+            classList: params.classList.match(/.*:-/)[0].replace(":-", "").split(" "),
+            content: params.content.match(/.*:-/)[0].replace(":-", "")
+        };
+        this.changedState = {
+            classList: params.classList.match(/:-.*/)[0].replace(":-", "").split(" "),
+            content: params.content.match(/:-.*/)[0].replace(":-", "")
+        };
+
+        this.input.removeAttribute("data-changing-button");
+        if (!this.input.dataset.isChangedButton) this.input.dataset.isChangedButton = "false";
+        // this.initState();
+        this.input.addEventListener("click", this.changeState);
+    }
+    initState() {
+        if (this.input.dataset.isChangedButton == "false") this.setOriginalState();
+        else this.setChangedState();
+    }
+    changeState() {
+        if (this.input.dataset.isChangedButton == "false") this.setChangedState();
+        else this.setOriginalState();
+    }
+    setChangedState() {
+        this.contentContainer.innerHTML = this.changedState.content;
+        this.originalState.classList.forEach(className => {
+            this.input.className = this.input.className.replace(className, "");
+        });
+        this.changedState.classList.forEach(className => {
+            this.input.className += " " + className;
+            this.input.className = this.input.className.replace(/\s\s/g, " ");
+        });
+        this.input.dataset.isChangedButton = "true";
+    }
+    setOriginalState() {
+        this.contentContainer.innerHTML = this.originalState.content;
+        this.changedState.classList.forEach(className => {
+            this.input.className = this.input.className.replace(className, "");
+        });
+        this.originalState.classList.forEach(className => {
+            this.input.className += " " + className;
+            this.input.className = this.input.className.replace(/\s\s/g, " ");
+        });
+        this.input.dataset.isChangedButton = "false";
+    }
+}
+
 const inittingSelectors = [
     { selector: "[data-show-more]", classInstance: ButtonShowMore },
     { selector: "[data-title]", classInstance: DataTitle },
@@ -1011,6 +1080,7 @@ const inittingSelectors = [
     { selector: ".back-to-top", classInstance: BackToTopButton },
     { selector: ".spoiler", classInstance: Spoiler },
     { selector: "[data-scroll-shadow]", classInstance: ScrollShadow },
+    { selector: "[data-changing-button]", classInstance: ChangingButton },
 ]
 
 // найти совпадения в removedNodes и addedNodes, дабы исключить бесконечный цикл инициализации при возникающих ошибках
