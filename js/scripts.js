@@ -2,6 +2,8 @@
     Здесь находятся основные скрипты (шапка, состояние пользователя - авторизован или нет, методы для инициализации input'ов, полезные data-атрибуты и др.)
 */
 
+const rootPath = "/job1/";
+
 // получить название страницы и активировать соответствующие кнопки
 function getPageName() {
     const pageNameElem = document.querySelector("[data-page-name]");
@@ -128,6 +130,19 @@ function getScrollWidth() {
     const scrollWidth = div.offsetWidth - div.clientWidth;
     div.remove();
     return scrollWidth;
+}
+
+// превратить массив строк в одну строку и обернуть wrapper, если трубуется
+function arrayToString(arr, wrapper = false) {
+    // wrapper === строка с ключевой подстрокой "[[]]", которая будет заменена строкой из arr; пример: <li>[[]]</li> станет <li>Какой-то текст</li>. Если отсутствует wrapper или такой подстроки нет, вернется просто строка.
+    if(!wrapper || !wrapper.match("[[]]")) return arr.join(", ");
+    
+    let string = ``;
+    arr.forEach(substr => {
+        const wrapped = wrapper.replace("[[]]", substr);
+        string += wrapped;
+    });
+    return string;
 }
 
 // модальное окно

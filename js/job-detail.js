@@ -1,16 +1,19 @@
+const jobsDataURL = `${rootPath}json/jobs.json`;
+
 class JobDetailState {
     defineState() {
         setTimeout(() => {
             const oldJobId = this.jobId;
             this.jobId = window.location.hash.replace("#", "");
-            if (this.jobId == oldJobId) return;
-
-            if (this.jobId) this.setShowState();
-            else this.setHideState();
 
             const jobDetailItems = inittedInputs
                 .filter(inpParams => inpParams instanceof JobDetailListItem);
             jobDetailItems.forEach(item => item.setState());
+
+            if (this.jobId == oldJobId) return;
+
+            if (this.jobId) this.setShowState();
+            else this.setHideState();
         }, 100);
     }
     setShowState() {
@@ -42,12 +45,15 @@ class JobsListing {
     constructor(elem) {
         this.onJobsSearchSubmit = this.onJobsSearchSubmit.bind(this);
         this.removeTag = this.removeTag.bind(this);
+        this.renderJobs = this.renderJobs.bind(this);
+        this.loadJobs = this.loadJobs.bind(this);
 
         this.elem = observeNodeBeforeInit(elem);
         // блоки внутри jobs-listing
         this.title = this.elem.querySelector(".jobs-search-list__title");
         this.emptyResult = this.elem.querySelector(".jobs-search-list__empty-result");
         this.infoBox = this.elem.querySelector(".jobs-search-list__info-box");
+        this.jobsListContainer = this.elem.querySelector(".jobs-list");
         this.loadMore = this.elem.querySelector(".more-jobs");
         this.tagsList = this.elem.querySelector(".jobs-filter-buttons__tags");
         // блоки фильтра вверху страницы
@@ -58,7 +64,9 @@ class JobsListing {
         this.filterListItemNames = ["professional-area", "employment-type", "work-experience", "salary"];
         this.filterInputs = [];
         this.createdTags = [];
+        this.jobsRendered = [];
         this.jobsSearchForm = document.querySelector(".jobs-search-form");
+        this.maxJobsOnLoad = 2;
 
         this.emptyResult.classList.add("__removed");
         this.infoBox.classList.add("__removed");
@@ -67,6 +75,132 @@ class JobsListing {
             inputs.forEach(inp => this.filterInputs.push(inp));
         });
         this.jobsSearchForm.addEventListener("submit", this.onJobsSearchSubmit);
+        this.loadMore.addEventListener("click", this.loadJobs);
+        this.loadJobs();
+    }
+    createButtonLoading() {
+        if (this.loadMore.querySelector(".loading-box")) return;
+
+        const boxLayout = `
+        <div class="loading-box">
+            <span class="loading-box__dot"></span>
+            <span class="loading-box__dot"></span>
+            <span class="loading-box__dot"></span>
+        </div>
+        `;
+        this.loadMore.insertAdjacentHTML("afterbegin", boxLayout);
+    }
+    removeButtonLoading() {
+        const box = this.loadMore.querySelector(".loading-box");
+        if (box) box.remove();
+    }
+    loadJobs() {
+        return new Promise((resolve, reject) => {
+            this.createButtonLoading();
+            fetch(jobsDataURL)
+                .then(response => {
+                    if (!response.ok) {
+                        this.removeButtonLoading();
+                        reject();
+                    }
+
+                    response.json().then(data => {
+                        if (!this.jobs) this.jobs = [];
+                        let counter = 0;
+                        for (let job of data) {
+                            const alreadyRendered = this.jobs.find(j => j.id === job.id);
+                            if (alreadyRendered || counter >= this.maxJobsOnLoad) continue;
+
+                            this.jobs.push(job);
+                            counter++;
+                        }
+                        resolve();
+                    });
+                });
+        }).then(() => {
+            setTimeout(() => {
+                this.renderJobs();
+                this.removeButtonLoading();
+            }, 1500);
+        });
+    }
+    renderJobs() {
+        this.jobs.forEach(job => {
+            if (this.jobsRendered.find(id => id === job.id)) return;
+
+            getIcon(job).then(icon => {
+                const locationString = `
+                <li class="jobs-list__location">
+                    <a class="jobs-list__location-link"
+                        href="#">[[]]</a>,
+                </li>
+                `;
+                const node = `
+                <li class="jobs-list__item" data-job-id="${job.id}">
+                    <div class="jobs-list__item-container">
+                        <a class="jobs-list__item-image-container" href="#">
+                            <span class="jobs-list__item-image-link">
+                                ${icon}
+                            </span>
+                        </a>
+                        <div class="jobs-list__item-data-container">
+                            <h2 class="jobs-list__title">
+                                <a class="jobs-list__title-link link" href="#">
+                                    ${job.title}
+                                </a>
+                            </h2>
+                            <div class="jobs-list__meta">
+                                <div class="jobs-list__item-company">
+                                    <a class="jobs-list__item-company-name"
+                                        href="${job.url}"
+                                        target="_blank">
+                                        ${job.employer}
+                                    </a>
+                                </div>
+                                <div class="jobs-list__item-wrap">
+                                <ul class="jobs-list__locations">
+                                    ${arrayToString(job.locations, locationString)}
+                                </ul>
+                                <a class="jobs-list__item-date" href="#">
+                                    ${job.date}
+                                </a>
+                                </div>
+                            </div>
+                            <p class="jobs-list__snippet">
+                                <a href="#">
+                                    ${job.description}
+                                </a>
+                            </p>
+                            <div class="jobs-list__user-action-container">
+                                <div class="jobs-list__watch-list">
+                                    <button class="jobs-list__user-button icon-star"
+                                        data-changing-button="classList='icon-star:-icon-star-full', contentContainer='.jobs-list__user-button-text', content='В избранное:-В избранном'">
+                                        <span class="jobs-list__user-button-text">
+                                            В избранное
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                `;
+                this.jobsListContainer.insertAdjacentHTML("beforeend", node);
+
+                this.jobsRendered.push(job.id);
+                jobDetailState.defineState();
+            });
+        });
+
+        function getIcon(job) {
+            return new Promise(resolve => {
+                const url = `${rootPath}${job.iconURL}`;
+                fetch(url).then(response => {
+                    if (!response.ok) return resolve("");
+                    response.text().then(data => resolve(data));
+                });
+            });
+        }
     }
     onJobsSearchSubmit(event) {
         event.preventDefault();
@@ -93,7 +227,7 @@ class JobsListing {
         else {
             const text = `Вакансии ${keywords ? keywords : ""} ${location ? "в г." : ""} ${location ? location : ""}`;
             if (!radiusInput) this.title.innerHTML = text;
-            if (radiusInput) this.title.innerHTML = 
+            if (radiusInput) this.title.innerHTML =
                 `${text} ${radiusInput.value ? "в радиусе" : ""} ${radiusInput.value ? radiusInput.value : ""}`
         }
     }
@@ -120,7 +254,7 @@ class JobsListing {
         const value = tag.querySelector(".tag__text").innerHTML;
         const name = tag.dataset.inputName;
         this.createdTags = this.createdTags.filter(tagData => {
-            if(tagData.value === value && tagData.name === name) return false;
+            if (tagData.value === value && tagData.name === name) return false;
             return true;
         });
         Array.from(document.querySelectorAll((`input[name="${name}"]`)))
@@ -197,17 +331,6 @@ class JobDetail {
         this.drawJobDetailContent();
         this.closeButton.addEventListener("click", jobDetailState.setHideState);
     }
-    arrayToString(arr, doWrap = false) {
-        // doWrap = false|{ tagName: "...", className: "..." }
-        const strings = arr.toString().split(",");
-        if (!doWrap) return strings.join(", ");
-
-        let wrapped = ``;
-        for (let substr of strings) {
-            wrapped += `<${doWrap.tagName} class="${doWrap.className || ""}">${substr}</${doWrap.tagName}>`
-        }
-        return wrapped;
-    }
     createLoadingOverlay() {
         this.loadingOverlay.classList.remove("__removed");
         if (this.loadingOverlay.querySelector(".loading-overlay__dot")) return;
@@ -228,12 +351,15 @@ class JobDetail {
         getData = getData.bind(this);
 
         this.createLoadingOverlay();
-        fetch("/job1/json/jobs.json").then(response => {
+        fetch(jobsDataURL).then(response => {
+            if (!response.ok) return;
             response.json().then(getData);
         }).finally(this.removeLoadingOverlay);
 
         function getData(data) {
-            data = data[this.jobId];
+            if (!Array.isArray(data)) return;
+
+            data = data.find(item => item.id === this.jobId);
             if (!data) return;
 
             this.contentTemplate = `
@@ -251,10 +377,10 @@ class JobDetail {
                                 </a>
                             </li>
                             <li class="job-header-m__meta-item  icon-location">
-                                ${this.arrayToString(data.location)}
+                                ${arrayToString(data.locations)}
                             </li>
                             <li class="job-header-m__meta-item  icon-clock-arrow">
-                                ${this.arrayToString(data["employment-type"])}
+                                ${arrayToString(data["employment-type"])}
                             </li>
                             <li class="job-header-m__meta-item  icon-portfolio">
                                 ${data.expierence}
@@ -401,7 +527,7 @@ class JobDetail {
                     </button>
                 </div>
                 <div class="job-content">
-                    ${this.arrayToString(data["job-data"], { tagName: "p" })}
+                    ${arrayToString(data["job-data"], `<p>[[]]</p>`)}
                 </div>
             </div>
             `;
@@ -426,7 +552,7 @@ class JobDetail {
         this.currentTabBar = tabBarValue;
 
         this.jobContent.innerHTML = "";
-        const insertToJobContent = this.arrayToString(this.jobData[tabBarValue], { tagName: "p" }) || "";
+        const insertToJobContent = arrayToString(this.jobData[tabBarValue], `<p>[[]]</p>`) || "";
         this.jobContent.insertAdjacentHTML("afterbegin", insertToJobContent);
     }
     onContainerScroll() {
