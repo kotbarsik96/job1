@@ -38,6 +38,7 @@ class JobDetailState {
 }
 // данный экземлпяр класса используется, чтобы выставить элементам на странице состояние показа вакансии (setShowState()) или состояние без показанной вакансии (setHideState). Метод defineState() определяет состояние и саму вакансию на основе хэша в адресной строке (#101, #102, ...)
 const jobDetailState = new JobDetailState();
+window.addEventListener("hashchange", jobDetailState.defineState.bind(jobDetailState));
 
 
 // список вакансий
@@ -215,6 +216,7 @@ class JobsListing {
         });
 
         this.setTitleText();
+        if (!this.isRenderedAlarmDisruptor) this.renderAlarmDisruptor();
     }
     setTitleText() {
         const keywords = this.companySearch.value.trim();
@@ -279,6 +281,31 @@ class JobsListing {
             input.dispatchEvent(new Event("change"));
         }
     }
+    renderAlarmDisruptor() {
+        const node = `
+        <li class="jobs-list__item jobs-list__alarm-disruptor alarm-disruptor">
+            <div class="alarm-disruptor__inner alarm-disruptor__inner--inline">
+                <div class="alarm-disruptor__image">
+                    <img src="../img/icons/notify-bell.svg" alt="Колокольчик">
+                </div>
+                <h3 class="alarm-disruptor__headline">
+                    <p>Мы подберем вакансии по выбранным позициям</p>
+                    <p>Отправить запрос?</p>
+                </h3>
+                <form novalidate class="alarm-disruptor__form">
+                    <button class="alarm-disruptor__submit-button button">
+                        Получать уведомления о вакансиях
+                    </button>
+                    <div class="alarm-disruptor__no-spam-text">
+                        Вы получите только уведомления о вакансиях - ничего больше!
+                    </div>
+                </form>
+            </div>
+        </li>
+        `;
+        this.jobsListContainer.insertAdjacentHTML("beforeend", node);
+        this.isRenderedAlarmDisruptor = true;
+    }
 }
 
 // элемент в списке вакансий
@@ -309,6 +336,7 @@ class AlarmDisruptorListItem {
 
     }
 }
+const alarmDisruptorItem = new AlarmDisruptorListItem();
 
 // детали вакансии
 class JobDetail {
@@ -372,7 +400,7 @@ class JobDetail {
                         <ul class="job-header-m__meta-list">
                             <li
                                 class="job-header-m__meta-item  icon-building-with-tree">
-                                <a class="job-header-m__company-link link" href="#">
+                                <a class="job-header-m__company-link link" href="${data.url}">
                                     ${data.employer}
                                 </a>
                             </li>
@@ -557,18 +585,17 @@ class JobDetail {
     }
     onContainerScroll() {
         this.doFixHeader = this.container.scrollTop > this.header.offsetHeight;
-        if (this.doFixHeader) {
-            this.header.classList.add("__sticky");
+        if (this.doFixHeader && !this.isHeaderFixed) {
+            setTimeout(() => this.header.classList.add("__sticky"), 100);
             this.closeContainer.classList.add("__visible");
-        }
-        else {
-            this.header.classList.remove("__sticky");
+        } else {
+            setTimeout(() => this.header.classList.remove("__sticky"), 100);
             this.closeContainer.classList.remove("__visible");
             this.header.style.removeProperty("top");
             this.closeContainer.style.removeProperty("top");
         }
 
-        if (this.noHideHeaderMedia.matches == false) this.hideHeader();
+        if (!this.noHideHeaderMedia.matches) this.hideHeader();
         this.containerScrolledTop = this.container.scrollTop;
     }
     hideHeader() {
