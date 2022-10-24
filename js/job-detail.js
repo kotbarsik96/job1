@@ -225,12 +225,14 @@ class JobsListing {
 
         if (!keywords && !location && !radiusInput && this.checkedFilterInputs.length < 1)
             this.title.innerHTML = "Текущие вакансии";
-        else if (!keywords && !location && !radiusInput) this.title.innerHTML = "2 вакансии";
+        else if (!keywords && !location && !radiusInput) 
+            this.title.innerHTML = "<span class='jobs-search-list__title--bigger-text'>2</span> вакансии";
         else {
             const text = `Вакансии ${keywords ? keywords : ""} ${location ? "в г." : ""} ${location ? location : ""}`;
             if (!radiusInput) this.title.innerHTML = text;
             if (radiusInput) this.title.innerHTML =
-                `${text} ${radiusInput.value ? "в радиусе" : ""} ${radiusInput.value ? radiusInput.value : ""}`
+                `${text} ${radiusInput.value ? "в радиусе" : ""} 
+                ${radiusInput.value ? `<span class="jobs-search-list__title--bigger-text">${radiusInput.value}</span>` : ""}`
         }
     }
     createTag(value, name) {
