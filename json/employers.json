@@ -1,0 +1,17 @@
+[
+    {
+        "tag": "sormovskaya-fabrika",
+        "title": "Сормовская Фабрика",
+        "iconURL": "svg-elements/logos/sormovskaya-fabrika.html"
+    },
+    {
+        "tag": "vash-personal",
+        "title": "Ваш Персонал",
+        "iconURL": "svg-elements/logos/vash-personal.html"
+    },
+    {
+        "tag": "valdai",
+        "title": "Валдай",
+        "iconURL": "svg-elements/logos/valdai.html"
+    }
+]
