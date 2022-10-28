@@ -2,16 +2,31 @@
     {
         "tag": "sormovskaya-fabrika",
         "title": "Сормовская Фабрика",
-        "iconURL": "svg-elements/logos/sormovskaya-fabrika.html"
+        "iconURL": "svg-elements/logos/sormovskaya-fabrika.html",
+        "activeAds": 7
     },
     {
         "tag": "vash-personal",
         "title": "Ваш Персонал",
-        "iconURL": "svg-elements/logos/vash-personal.html"
+        "iconURL": "svg-elements/logos/vash-personal.html",
+        "activeAds": 0
     },
     {
         "tag": "valdai",
         "title": "Валдай",
-        "iconURL": "svg-elements/logos/valdai.html"
+        "iconURL": "svg-elements/logos/valdai.html",
+        "activeAds": 0
+    },
+    {
+        "tag": "nash-dom",
+        "title": "Наш Дом",
+        "iconURL": "svg-elements/logos/nash-dom.html",
+        "activeAds": 5
+    },
+    {
+        "tag": "bezopastnost",
+        "title": "Безопасность",
+        "iconURL": "svg-elements/logos/bezopastnost.html",
+        "activeAds": 17
     }
 ]
