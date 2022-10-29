@@ -6,8 +6,12 @@
         "url": "https://kotbarsik96.github.io/job1/f/sormovskaya-fabrika/",
         "iconURL": "svg-elements/logos/sormovskaya-fabrika.html",
         "locations": [
-            "Нижний Новгород",
-            "Сормовский район"
+            {
+                "city": "Нижний Новгород",
+                "districts": [
+                    "Сормовский"
+                ]
+            }
         ],
         "employment-type": [
             "Полная занятость",
@@ -36,9 +40,13 @@
         "url": "https://kotbarsik96.github.io/job1/f/vash-personal/",
         "iconURL": "svg-elements/logos/vash-personal.html",
         "locations": [
-            "Нижний Новгород",
-            "Сормовский",
-            "Московский районы"
+            {
+                "city": "Нижний Новгород",
+                "districts": [
+                    "Сормовский",
+                    "Московский"
+                ]
+            }
         ],
         "distant": true,
         "employment-type": [
@@ -68,8 +76,10 @@
         "url": "https://kotbarsik96.github.io/job1/f/valdai/",
         "iconURL": "svg-elements/logos/valdai.html",
         "locations": [
-            "Нижний Новгород",
-            "все районы"
+            {
+                "city": "Нижний Новгород",
+                "districts": "все районы"
+            }
         ],
         "distant": true,
         "employment-type": [
@@ -98,10 +108,14 @@
         "url": "https://kotbarsik96.github.io/job1/f/nash-dom/",
         "iconURL": "svg-elements/logos/nash-dom.html",
         "locations": [
-            "Нижний Новгород",
-            "Московский",
-            "Сормовский",
-            "Приокский районы"
+            {
+                "city": "Нижний Новгород",
+                "districts": [
+                    "Московский",
+                    "Сормовский",
+                    "Приокский"
+                ]
+            }
         ],
         "distant": true,
         "employment-type": [
@@ -130,8 +144,10 @@
         "url": "https://kotbarsik96.github.io/job1/f/bezopastnost/",
         "iconURL": "svg-elements/logos/bezopastnost.html",
         "locations": [
-            "Нижний Новгород",
-            "все районы"
+            {
+                "city": "Нижний Новгород",
+                "districts": "все районы"
+            }
         ],
         "distant": true,
         "employment-type": [
