@@ -37,7 +37,8 @@
         "iconURL": "svg-elements/logos/vash-personal.html",
         "locations": [
             "Нижний Новгород",
-            "Сормовский, Московский районы" 
+            "Сормовский",
+            "Московский районы"
         ],
         "distant": true,
         "employment-type": [
@@ -98,7 +99,9 @@
         "iconURL": "svg-elements/logos/nash-dom.html",
         "locations": [
             "Нижний Новгород",
-            "Сормовский, Московский, Приокский районы"
+            "Московский",
+            "Сормовский",
+            "Приокский районы"
         ],
         "distant": true,
         "employment-type": [
