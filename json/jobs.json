@@ -3,6 +3,7 @@
         "id": "101",
         "title": "Ведущий инженер-механик",
         "employer": "Сормовская Фабрика",
+        "employerId": "emp11",
         "url": "https://kotbarsik96.github.io/job1/f/sormovskaya-fabrika/",
         "iconURL": "svg-elements/logos/sormovskaya-fabrika.html",
         "locations": [
@@ -25,6 +26,7 @@
         "id": "102",
         "title": "Работник на производство",
         "employer": "Ваш Персонал",
+        "employerId": "emp12",
         "url": "https://kotbarsik96.github.io/job1/f/vash-personal/",
         "iconURL": "svg-elements/logos/vash-personal.html",
         "locations": [
@@ -49,6 +51,7 @@
         "id": "103",
         "title": "Инженер охранно-пожарной сигнализации",
         "employer": "Безопасность",
+        "employerId": "emp13",
         "url": "https://kotbarsik96.github.io/job1/f/bezopasnost/",
         "iconURL": "svg-elements/logos/bezopasnost.html",
         "locations": [
@@ -69,6 +72,7 @@
         "id": "104",
         "title": "Рабочий по комплексному обслуживанию и ремонту зданий",
         "employer": "Наш Дом",
+        "employerId": "emp14",
         "url": "https://kotbarsik96.github.io/job1/f/nash-dom/",
         "iconURL": "svg-elements/logos/nash-dom.html",
         "locations": [
@@ -91,8 +95,9 @@
     },
     {
         "id": "105",
-        "title": "Торговый представитель",
+        "title": "Охранник (вахтовый метод)",
         "employer": "Валдай",
+        "employerId": "emp15",
         "url": "https://kotbarsik96.github.io/job1/f/valdai/",
         "iconURL": "svg-elements/logos/valdai.html",
         "locations": [
@@ -107,6 +112,6 @@
         ],
         "expierence": "С опытом работы",
         "date": "5.08.2022",
-        "description": "ООО «ВиК» специализируется на снабжении предприятий, сервисов, оптовых и розничных точек продаж автомаслами, автохимией, автокосметикой, автозапчастями, автосмазками и фильтрами на все модели автомобилей."
+        "description": "В нашей компании есть открытые вакансии. Мы предлагаем работу с регулярной выплатой заработной платы без задержек, скрытых штрафов и сборов. Официальное оформление по ТК."
     }
 ]

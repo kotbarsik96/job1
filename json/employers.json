@@ -196,7 +196,8 @@
                     ]
                 }
             ]
-        }
+        },
+        "video": true
     },
     {
         "id": "emp12",
@@ -353,7 +354,9 @@
                     ]
                 }
             ]
-        }
+        },
+        "video": true,
+        "employer": true
     },
     {
         "id": "emp13",
@@ -650,13 +653,16 @@
                     ]
                 }
             ]
-        }
+        },
+        "video": true,
+        "employer": true
     },
     {
-        "id": "",
+        "id": "emp15",
         "tag": "valdai",
         "iconURL": "svg-elements/logos/valdai.html",
         "title": "Валдай",
-        "activeAds": []
+        "activeAds": [],
+        "employer": true
     }
 ]
