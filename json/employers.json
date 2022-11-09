@@ -231,6 +231,7 @@
             "emp15"
         ],
         "website": "https://www.uniconf.ru/",
+        "avatar": "/job1/img/companies/sormovskaya-fabrika/avatar.jpg",
         "video": true
     },
     {
@@ -397,7 +398,8 @@
         ],
         "website": "https://vpstaff.ru/",
         "video": true,
-        "employer": true
+        "avatar": "/job1/img/companies/vash-personal/avatar.jpg",
+        "description": true
     },
     {
         "id": "emp13",
@@ -526,6 +528,7 @@
             "emp15"
         ],
         "website": "https://bzp-nn.ru/",
+        "avatar": "/job1/img/companies/bezopasnost/avatar.jpg",
         "location": {
             "name": "Группа охранных компаний \"Безопасность\"",
             "src": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d141666.07388543966!2d43.81494025318015!3d56.303384107752514!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4151d5e79275ca79%3A0x5d2c398a7ca97ff6!2z0JHQtdC30L7Qv9Cw0YHQvdC-0YHRgtGMLCDQs9GA0YPQv9C_0LAg0L7RhdGA0LDQvdC90YvRhSDQutC-0LzQv9Cw0L3QuNC5!5e0!3m2!1sru!2sru!4v1667568055188!5m2!1sru!2sru",
@@ -710,7 +713,8 @@
         ],
         "website": "https://nashdomnn.ru/",
         "video": true,
-        "employer": true
+        "avatar": "/job1/img/companies/nash-dom/avatar.jpg",
+        "description": true
     },
     {
         "id": "emp15",
@@ -845,6 +849,7 @@
             "emp14"
         ],
         "website": "https://valdai1.ru/",
-        "employer": true
+        "avatar": "/job1/img/companies/valdai/avatar.jpg",
+        "description": true
     }
 ]
