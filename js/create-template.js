@@ -1,0 +1,1 @@
+class CreateTemplateBlock{constructor(e,t){this.selector=e}}const createTemplateBlocks=[new CreateTemplateBlock(".resume-template__body",{})];
