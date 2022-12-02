@@ -1,0 +1,56 @@
+[
+    {
+        "controlName": "template",
+        "controlTitle": "шаблон",
+        "controlItems": [
+            {
+                "value": "line",
+                "title": "линия"
+            },
+            {
+                "value": "column",
+                "title": "колонка"
+            },
+            {
+                "value": "block",
+                "title": "блок"
+            }
+        ]
+    },
+    {
+        "controlName": "color",
+        "controlTitle": "цвет",
+        "controlItems": [
+            {
+                "value": "gray",
+                "title": "серый",
+                "iconStyle": "color: #607d8b;"
+            },
+            {
+                "value": "lightgreen",
+                "title": "светло-зеленый",
+                "iconStyle": "color: #d6edb2;"
+            },
+            {
+                "value": "red",
+                "title": "красный",
+                "iconStyle": "color: #8d2f33;"
+            }
+        ]
+    },
+    {
+        "controlName": "font-style",
+        "controlTitle": "шрифт",
+        "controlItems": [
+            {
+                "value": "regular",
+                "title": "обычный"
+            },
+            {
+                "value": "italic",
+                "title": "курсивный",
+                "textStyle": "font-style: italic;"
+            }
+        ]
+    }
+]

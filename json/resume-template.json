@@ -1,0 +1,172 @@
+{
+    "controlName": "template",
+    "controlTitle": "шаблон",
+    "type": "image",
+    "controlItems": [
+        {
+            "value": "line",
+            "title": "линия",
+            "src": "/job1/img/create-resume/cv-templates/previews/line.png",
+            "options": [
+                {
+                    "controlName": "color",
+                    "controlTitle": "цвет",
+                    "controlItems": [
+                        {
+                            "value": "gray",
+                            "title": "серый",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #607d8b;"
+                        },
+                        {
+                            "value": "lightgreen",
+                            "title": "светло-зеленый",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #d6edb2;"
+                        },
+                        {
+                            "value": "red",
+                            "title": "красный",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #8d2f33;"
+                        }
+                    ]
+                },
+                {
+                    "controlName": "font_style",
+                    "controlTitle": "шрифт",
+                    "controlItems": [
+                        {
+                            "value": "regular",
+                            "title": "обычный",
+                            "textStyle": "font-weight: 500; color: #000;"
+                        },
+                        {
+                            "value": "italic",
+                            "title": "курсивный",
+                            "textStyle": "font-style: italic; color: #000; font-weight: 500;"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "column",
+            "title": "колонка",
+            "src": "/job1/img/create-resume/cv-templates/previews/column.png",
+            "options": [
+                {
+                    "controlName": "color",
+                    "controlTitle": "цвет",
+                    "controlItems": [
+                        {
+                            "value": "gray",
+                            "title": "серый",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #607d8b;"
+                        },
+                        {
+                            "value": "green",
+                            "title": "зеленый",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #68cc77;"
+                        },
+                        {
+                            "value": "red",
+                            "title": "красный",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #bc173b;"
+                        },
+                        {
+                            "value": "lightblue",
+                            "title": "светло-голубой",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #2bb9dd;"
+                        },
+                        {
+                            "value": "black",
+                            "title": "черный",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #333;"
+                        }
+                    ]
+                },
+                {
+                    "controlName": "font_style",
+                    "controlTitle": "шрифт",
+                    "controlItems": [
+                        {
+                            "value": "regular",
+                            "title": "обычный",
+                            "textStyle": "font-weight: 500; color: #000;"
+                        },
+                        {
+                            "value": "italic",
+                            "title": "курсивный",
+                            "textStyle": "font-style: italic; color: #000; font-weight: 500;"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "value": "block",
+            "title": "блок",
+            "src": "/job1/img/create-resume/cv-templates/previews/block.png",
+            "options": [
+                {
+                    "controlName": "color",
+                    "controlTitle": "цвет",
+                    "controlItems": [
+                        {
+                            "value": "gray",
+                            "title": "серый",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #607d8b;"
+                        },
+                        {
+                            "value": "green",
+                            "title": "зеленый",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #68cc77;"
+                        },
+                        {
+                            "value": "lightblue",
+                            "title": "светло-голубой",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #2bb9dd;"
+                        },
+                        {
+                            "value": "blue",
+                            "title": "синий",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #1e90ff;"
+                        },
+                        {
+                            "value": "cherry-red",
+                            "title": "вишнево-красный",
+                            "iconName": "icon-dot",
+                            "iconStyle": "color: #ea0f58;"
+                        }
+                    ]
+                },
+                {
+                    "controlName": "font_style",
+                    "controlTitle": "шрифт",
+                    "controlItems": [
+                        {
+                            "value": "regular",
+                            "title": "обычный",
+                            "textStyle": "font-weight: 500; color: #000;"
+                        },
+                        {
+                            "value": "italic",
+                            "title": "курсивный",
+                            "textStyle": "font-style: italic; color: #000; font-weight: 500;"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
