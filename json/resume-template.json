@@ -48,7 +48,8 @@
                         }
                     ]
                 }
-            ]
+            ],
+            "fileExtension": "jpg"
         },
         {
             "value": "column",
@@ -107,7 +108,8 @@
                         }
                     ]
                 }
-            ]
+            ],
+            "fileExtension": "jpg"
         },
         {
             "value": "block",
@@ -166,7 +168,8 @@
                         }
                     ]
                 }
-            ]
+            ],
+            "fileExtension": "jpg"
         }
     ]
 }
