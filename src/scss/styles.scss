@@ -840,7 +840,7 @@ a {
         position: absolute;
         top: 16px;
         right: 16px;
-        > .ic-close {
+        .icon-close::before {
             cursor: pointer;
             background: transparent;
             color: #7c8797;
@@ -880,6 +880,11 @@ a {
 
     &__content {
         text-align: center;
+    }
+
+    &__pre-title-image {
+        max-height: 80px;
+        margin-bottom: 1.5rem;
     }
 
     &__title {
@@ -936,6 +941,76 @@ a {
         &__close.modal__close--image {
             width: 40px;
             height: 40px;
+        }
+    }
+    @media (max-height: 549px) {
+        &__body {
+            align-self: flex-start !important;
+        }
+    }
+}
+
+.modal--data-protect {
+    padding: 0;
+
+    .modal {
+        &__body {
+            background: #f4fbf0;
+            width: 100%;
+            min-height: 100%;
+            padding: 2rem 1rem 2.5rem 1rem;
+            border-radius: 0;
+            font-size: 1.125rem;
+        }
+
+        &__title {
+            max-width: 27.5rem;
+            margin: 0 auto 1.5rem auto;
+        }
+
+        &__marked-list {
+            font-weight: 400;
+            font-size: 1.125rem;
+        }
+
+        &__close{
+            right: 1.75rem;
+            top: 1.75rem;
+
+            .icon-close::before{
+                font-size: 1.35rem;
+            }
+        }
+
+        &__buttons{
+            margin-top: 2rem;
+        }
+    }
+
+    @media (max-height: 659px) {
+        padding: 0;
+
+        .modal {
+            &__body {
+                background: #f4fbf0;
+                max-width: none;
+                width: 100%;
+                min-height: 100%;
+                padding: 2rem 1rem 2.5rem 1rem;
+                border-radius: 0;
+            }
+        }
+    }
+    @media (min-width: 720px) {
+        padding: auto;
+
+        .modal {
+            &__body {
+                max-width: 720px;
+                min-height: 0;
+                align-self: center;
+                border-radius: 3px;
+            }
         }
     }
 }
@@ -3584,9 +3659,16 @@ a {
 }
 
 .marked-list {
+    &--left {
+        text-align: left;
+    }
+
     &__item {
         position: relative;
         padding: 0 0 0 1.5rem;
+        &:not(:first-child) {
+            margin-top: 0.5rem;
+        }
 
         &::before {
             position: absolute;
@@ -3596,6 +3678,7 @@ a {
             color: var(--action_color_2);
         }
     }
+
     .link {
         text-decoration: none;
     }
@@ -3625,7 +3708,7 @@ a {
     }
 
     &__slider {
-        position: relative; 
+        position: relative;
 
         .slider {
             &__control {

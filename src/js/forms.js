@@ -99,7 +99,7 @@ class AddFields {
             "Удалить блок?",
             "Будет удален выбранный блок",
             { text: "Удалить", confirmCallback },
-            "Не удалять");
+            { text: "Не удалять" });
         modal.getModalBody().classList.add("modal__body--small");
 
         function confirmCallback() {
@@ -1350,7 +1350,7 @@ class CutImage {
             "Скачать изображение",
             content,
             { text: "Скачать", confirmCallback: downloadByRadio },
-            "Отмена"
+            { text: "Отмена" }
         );
         const modalBody = modal.getModalBody();
         modalBody.classList.add("modal__body--small");

@@ -365,7 +365,7 @@ class Modal {
         });
         if (applyBtn) applyBtn.addEventListener("click", () => {
             removeMd();
-            apply.confirmCallback();
+            if (apply.confirmCallback) apply.confirmCallback();
         });
     }
     appendModal() {
@@ -696,9 +696,11 @@ class CreateModalLink {
     }
     onClick(event) {
         event.preventDefault();
+
+        const tg = event.target;
+        const tgId = tg.getAttribute("id");
         if (
-            event.target.getAttribute("id") === "conditions-link"
-            || event.target.dataset.agreementName === "conditions-link"
+            tgId === "conditions-link" || tg.dataset.agreementName === "conditions-link"
         ) {
             const title = "Условия направления физическими лицами заявлений в электронном виде в информационно-телекоммуникационной сети «Интернет» на сайте Job1.ru";
             const content = `
@@ -764,8 +766,7 @@ class CreateModalLink {
             modal.getTitle().classList.add("modal__title--agreement");
         }
         if (
-            event.target.getAttribute("id")
-            || event.target.dataset.agreementName === "data-processing-link"
+            tgId === "data-processing-link" || tg.dataset.agreementName === "data-processing-link"
         ) {
             const title = "Согласие на обработку персональных данных, применяемое при направлении заявлений в электронном виде в информационно-телекоммуникационной сети «Интернет» на сайте Job1.ru в целях получения услуг (далее – «Согласие»)";
             const content = `<div class="agreement__content">
@@ -809,6 +810,28 @@ class CreateModalLink {
             </div>`;
             modal.createBasicModal(title, content);
             modal.getTitle().classList.add("modal__title--agreement");
+        }
+        if (tgId === "data-control-link" || tg.dataset.modalName === "data-control-link") {
+            const title = "Максимальный контроль данных: определите, кто видит ваши данные";
+            const content = `
+                <ul class="modal__marked-list marked-list marked-list--left">
+                    <li class="marked-list__item icon-checkbox">
+                        Решайте сами, могут ли работодатели увидеть ваше резюме или нет. Если он помечен как видимый, работодатели могут найти вас и получить предложения о работе.
+                    </li>
+                    <li class="marked-list__item icon-checkbox">
+                        Скройте свое резюме от компаний, которые вы не хотите видеть, с помощью функции блокировки компании.
+                    </li>
+                    <li class="marked-list__item icon-checkbox">
+                        Личные данные (фото, имя, адрес, номер телефона, адрес электронной почты, работодатель, документы и веб-адреса) остаются скрытыми до тех пор, пока вы явно не предоставите их компании.
+                    </li>
+                </ul>
+            `;
+            const image = `
+                <img class="modal__pre-title-image" src="${rootPath}img/create-resume/security-shield.png">
+            `;
+            modal.createBasicModal(title, content, { text: "Понятно" });
+            modal.getTitle().insertAdjacentHTML("beforebegin", image);
+            modal.modal.classList.add("modal--data-protect");
         }
     }
 }
