@@ -1,0 +1,82 @@
+/* Слайдер */
+.slider {
+    overflow: hidden;
+
+    &__list {
+        display: flex;
+    }
+
+    &__pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+
+    // буллеты
+    &__pagination-item {
+        border-radius: 50%;
+        margin-right: 0.25rem;
+        width: 20px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__pagination-item--active &__pagination-button {
+        background: var(--action_color);
+    }
+
+    &__pagination-button {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #a2aab6;
+    }
+
+    // номера страниц
+    &__pagination-number{
+        font-size: 1.25rem;
+    }
+    &__pagination-delimeter{
+        margin: 0 10px;
+        font-size: 1.25rem;
+    }
+
+    &__controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    &__control {
+        display: inline-block;
+        color: #000;
+        padding: 0 6px;
+
+        &::before {
+            font-size: 15px;
+        }
+    }
+    &__control.__rotated {
+        transform: rotate(180deg) translate(0, 10%);
+    }
+    &__control[disabled] {
+        opacity: 0.3;
+    }
+}
+.slider--grab {
+    cursor: grab;
+}
+.slider--moving.slider--grab {
+    cursor: grabbing;
+}
+.slider--active {
+    .slider {
+        &__list {
+            touch-action: none;
+        }
+    }
+}

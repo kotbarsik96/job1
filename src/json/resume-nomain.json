@@ -1,0 +1,67 @@
+{
+    "fileExtension": "jpg",
+    "params": [
+        {
+            "controlName": "template",
+            "controlTitle": "шаблон",
+            "type": "image",
+            "controlItems": [
+                {
+                    "value": "line",
+                    "title": "линия",
+                    "src": "/job1/img/create-resume/cv-templates/previews/line.png"
+                },
+                {
+                    "value": "column",
+                    "title": "колонка",
+                    "src": "/job1/img/create-resume/cv-templates/previews/column.png"
+                },
+                {
+                    "value": "block",
+                    "title": "блок",
+                    "src": "/job1/img/create-resume/cv-templates/previews/block.png"
+                }
+            ]
+        },
+        {
+            "controlName": "color",
+            "controlTitle": "цвет",
+            "controlItems": [
+                {
+                    "value": "gray",
+                    "title": "серый",
+                    "iconName": "icon-dot",
+                    "iconStyle": "color: #607d8b;"
+                },
+                {
+                    "value": "lightgreen",
+                    "title": "светло-зеленый",
+                    "iconName": "icon-dot",
+                    "iconStyle": "color: #d6edb2;"
+                },
+                {
+                    "value": "red",
+                    "title": "красный",
+                    "iconName": "icon-dot",
+                    "iconStyle": "color: #8d2f33;"
+                }
+            ]
+        },
+        {
+            "controlName": "font-style",
+            "controlTitle": "шрифт",
+            "controlItems": [
+                {
+                    "value": "regular",
+                    "title": "обычный",
+                    "textStyle": "font-weight: 500; color: #000;"
+                },
+                {
+                    "value": "italic",
+                    "title": "курсивный",
+                    "textStyle": "font-style: italic; color: #000; font-weight: 500;"
+                }
+            ]
+        }
+    ]
+}

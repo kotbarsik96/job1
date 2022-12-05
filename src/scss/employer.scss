@@ -1,0 +1,1135 @@
+@import "import-only/nullstyles.scss";
+
+body {
+    height: auto;
+    width: auto;
+    color: #142542;
+    font-family: Raleway, Open Sans-fallback, Arial, sans-serif;
+    font-size: 1rem;
+    letter-spacing: -0.1px;
+    line-height: 1.5;
+}
+/* Логотипы svg */
+.logo {
+    display: block;
+    width: 85px;
+    height: 85px;
+}
+.logo--bordered {
+    border: 1px solid #e3e6e9;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+}
+.svg-logo {
+    &__vash-personal {
+        margin: 0;
+    }
+    &__vash-personal-item {
+        display: block;
+        float: left;
+        width: 53.24245453808533%;
+        margin: -1.6627971990181183% !important;
+    }
+
+    &__sormovskaya-fabrika {
+        margin: 0;
+    }
+    &__sormovskaya-fabrika-item {
+        display: block;
+        float: left;
+        width: 53.26273398853661%;
+        margin: -1.673196917198262% !important;
+    }
+
+    &__valdai {
+        margin: 0;
+    }
+    &__valdai-item {
+        display: block;
+        float: left;
+        width: 53.486882838501444%;
+        margin: -1.7881450453853567% !important;
+    }
+
+    &__nash-dom {
+        margin: 0;
+    }
+    &__nash-dom-item {
+        display: block;
+        float: left;
+        width: 53.23705179282869%;
+        margin: -1.6600265604249667% !important;
+    }
+
+    &__bezopastnost {
+        margin: 0;
+    }
+    &__bezopastnost-item {
+        display: block;
+        float: left;
+        width: 53.23166702228814%;
+        margin: -1.657265139634946% !important;
+    }
+}
+
+.content {
+    flex: 0 0 auto !important;
+}
+
+/* Стили */
+.link {
+    transition: color 0.2s;
+    color: inherit;
+    &:hover {
+        color: var(--action_color_2);
+    }
+}
+
+.section {
+    padding-bottom: 30px;
+    position: relative;
+
+    &__wrap {
+        margin: 0 auto;
+        max-width: var(--wrap_width);
+        width: 100%;
+    }
+    &__wrap--no-padding {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    @media (min-width: 720px) {
+        padding-bottom: 50px;
+
+        &__wrap {
+            padding: 0 15px;
+        }
+        &__inner--small {
+            width: 83%;
+            margin: 0 auto;
+        }
+        &__inner--extra-small {
+            width: 66%;
+            margin: 0 auto;
+        }
+    }
+}
+
+/* Звездный рейтинг */
+.star-rating {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    &__stars {
+        position: relative;
+    }
+
+    &__stars-list {
+        display: flex;
+        align-items: center;
+        .st-ic-container {
+            padding-right: 5px;
+        }
+    }
+
+    &__stars-filled {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 5;
+        pointer-events: none;
+    }
+
+    &__stars-filled-star {
+        &::before {
+            content: "\e900";
+            font-size: 20px;
+            color: var(--action_color);
+        }
+    }
+
+    &__label {
+        cursor: pointer;
+        &::before {
+            content: "\e901";
+            font-size: 20px;
+            color: var(--action_color);
+        }
+    }
+
+    &__input {
+        display: none;
+    }
+
+    &__comment {
+        font-size: 14px;
+    }
+}
+
+/* Блок контактов (email, телефон, веб-сайт) */
+.contacts {
+    &__phone {
+        display: inline-block;
+        transform: translate(0, -2px);
+    }
+}
+
+/* Заголовки */
+[class*="headline"] {
+    font-weight: 500;
+}
+.headline-3x1 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+}
+.headline-2x1 {
+    font-size: 2rem;
+    line-height: 1.3;
+}
+.headline-x1 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+}
+
+.job-company {
+    &__company-header {
+        padding-bottom: 30px;
+    }
+
+    &__headline {
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    &__about-text {
+        word-wrap: break-word;
+        hyphens: auto;
+        overflow-wrap: break-word;
+        margin-bottom: 5px;
+    }
+
+    &__about-paragraph {
+        display: block;
+        margin-bottom: 20px;
+    }
+
+    &__spoiler-button {
+        transition: color 0.2s;
+        text-decoration: underline;
+        &:hover {
+            color: var(--action_color_2);
+            text-decoration: none;
+        }
+    }
+
+    &__link-container {
+        text-align: center;
+    }
+    &__link-container--with-spacing {
+        margin-top: 1.5rem;
+    }
+
+    &__link {
+        cursor: pointer;
+        color: var(--action_color_2);
+        outline: none;
+        background: transparent;
+        text-align: center;
+        border: 1px solid var(--action_color);
+        border-radius: 3px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        line-height: 1.5;
+        padding: 0 30px;
+        height: 34px;
+        line-height: 33px;
+        text-decoration: none;
+        transition-property: background-color, border-color, color;
+        transition-duration: 0.2s;
+
+        &:hover {
+            background-color: var(--action_color_2);
+            border-color: var(--action_color_2);
+            color: #fff;
+        }
+
+        &::before {
+            content: "";
+            display: inline-block;
+            vertical-align: middle;
+            height: 100%;
+        }
+    }
+
+    &__jobs-list,
+    &__jobs-list.spoiler__hideable {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -5px;
+    }
+    &__jobs-list--center {
+        justify-content: center;
+    }
+
+    &__jobs-item {
+        padding: 0 5px;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    &__about-list,
+    &__about-list.spoiler__hideable--shown {
+        padding-left: 25px;
+    }
+
+    &__about-list-item {
+        list-style: disc;
+    }
+
+    @media (min-width: 720px) {
+        &__company-header {
+            padding-bottom: 50px;
+        }
+        &__jobs-item {
+            width: 70%;
+        }
+    }
+}
+.company-header {
+    &__background-image {
+        height: 220px;
+        position: relative;
+        z-index: 5;
+    }
+
+    &__background-image--fallback {
+        background-color: #f5f7f7;
+        background-image: url("../img/companies/fallback.svg");
+        background-position: 50%;
+        background-repeat: no-repeat;
+        background-size: 425px;
+    }
+
+    &__wrap {
+        position: relative;
+        z-index: 10;
+        margin: 0 auto;
+        max-width: var(--wrap_width);
+        padding: 0 15px;
+        width: 100%;
+    }
+
+    &__logo-link {
+        width: 80px;
+        height: 80px;
+        margin-top: -40px;
+        background: #fff;
+        border: 1px solid #e3e6e9;
+        border-radius: 5px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    &__logo-fallback {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    &__data-container {
+        text-align: center;
+        max-width: 100%;
+        text-align: center;
+        padding: 10px 0 15px 0;
+    }
+
+    &__details {
+        margin-bottom: 20px;
+    }
+
+    &__data {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
+
+    &__data-item {
+        margin: 0 10px 20px 10px;
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        &::before {
+            font-size: 13px;
+            color: #7c8797;
+            margin-right: 6px;
+        }
+    }
+    &__data-item.icon-clock {
+        &::before {
+            font-size: 15px;
+        }
+    }
+    &__data-online {
+        &::before {
+            color: var(--action_color);
+        }
+    }
+
+    &__title {
+        word-wrap: break-word;
+        margin-bottom: 5px;
+        hyphens: auto;
+        overflow-wrap: break-word;
+    }
+
+    &__details {
+        color: #7c8797;
+    }
+
+    &__button-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__button {
+        &.__active {
+            background: transparent;
+            color: var(--action_color_2);
+
+            &:hover {
+                color: #fff;
+                background: var(--action_color_2);
+            }
+        }
+
+        &::before {
+            margin-right: 0.5rem;
+            display: inline-block;
+            transform: translate(0, 2px);
+        }
+    }
+
+    @media (min-width: 720px) {
+        &__background-image {
+            height: 240px;
+        }
+        &__background-image--fallback {
+            background-size: 500px;
+        }
+        &__logo-link {
+            margin-top: -50px;
+            height: 100px;
+            width: 100px;
+        }
+    }
+}
+.company-images {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    &__item {
+        margin: 5px;
+        flex: 0 0 100%;
+        height: 160px;
+    }
+    &__item--main {
+        flex: 0 0 100%;
+        height: 200px;
+    }
+
+    &__image {
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    @media (min-width: 620px) {
+        &__item {
+            flex: 0 0 47%;
+        }
+        &__item--main {
+            flex: 0 0 100%;
+            height: 215px;
+        }
+    }
+}
+.company-values {
+    &__list,
+    &__hideable {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    &__item {
+        flex: 0 0 100%;
+        margin-bottom: 10px;
+        display: flex;
+
+        &::before {
+            color: #2e3d56;
+            flex: 0 0 auto;
+            margin: 8px 10px 10px 10px;
+            font-size: 23px;
+        }
+    }
+    &__item--full {
+        flex: 0 0 100%;
+        &::before {
+            margin-top: 5px;
+        }
+    }
+    &__item--full > &__content {
+        padding-bottom: 0;
+    }
+
+    &__hideable {
+        flex: 0 0 100%;
+    }
+
+    &__content {
+        flex: 1 1 auto;
+        padding: 0 10px 5px 10px;
+    }
+
+    &__title {
+        font-size: 1.5rem;
+        line-height: 1.3;
+        font-weight: 500;
+    }
+
+    @media (min-width: 720px) {
+        &__item {
+            flex: 0 0 47%;
+        }
+        &__item--full {
+            flex: 0 0 100%;
+        }
+    }
+}
+.company-benefits {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    &__item {
+        margin: 5px;
+        flex: 0 0 100%;
+        font-size: 22px;
+        padding: 20px 10px;
+        border: 1px solid #e1e1e1;
+        border-radius: 3px;
+        text-align: center;
+    }
+
+    &__title {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        &::after {
+            content: "";
+            order: 2;
+            padding-top: 18px;
+            width: 40px;
+            height: 1px;
+            border-bottom: 3px solid #138fcd;
+        }
+    }
+
+    @media (min-width: 620px) {
+        &__item {
+            flex: 0 0 47%;
+        }
+    }
+}
+.company-facts {
+    &__item {
+        margin-bottom: 10px;
+    }
+
+    &__title {
+        font-weight: 600;
+    }
+}
+
+.hyphenate {
+    word-wrap: break-word;
+    hyphens: auto;
+    overflow-wrap: break-word;
+}
+.job-card {
+    background-color: #fff;
+    border-radius: 3px;
+    height: 100%;
+    position: relative;
+    padding: 50px 20px;
+    margin: 5px;
+    color: #7c8797;
+
+    &--bordered {
+        border: 1px solid #e3e6e9;
+    }
+
+    &__link {
+        display: block;
+    }
+
+    &__title {
+        color: #142542;
+        font-weight: 600;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        margin-bottom: 3px;
+        max-height: 3em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__location,
+    &__date,
+    &__text {
+        padding: 0 8px 0 0;
+    }
+
+    &__text {
+        margin-top: 10px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        max-height: 4.5em;
+        text-overflow: ellipsis;
+    }
+
+    @media (min-width: 720px) {
+        &__text {
+            -webkit-line-clamp: 2;
+            max-height: 3em;
+        }
+    }
+}
+.company-recruiter {
+    border: 1px solid #e3e6e9;
+    background: #fff;
+    border-radius: 3px;
+    padding: 30px 0;
+
+    &__info {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    &__avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 25%;
+    }
+
+    &__avatar-inner {
+        border-radius: 50%;
+        width: 70px;
+        height: 70px;
+        position: relative;
+        overflow: hidden;
+        color: #e3e6e9;
+    }
+
+    &__data {
+        margin-top: 20px;
+        padding: 0 5px;
+        text-align: center;
+        width: 100%;
+    }
+
+    &__name {
+        margin-bottom: 0.125rem;
+        font-weight: 500;
+    }
+
+    &__optional {
+        margin-top: 15px;
+    }
+
+    &__city {
+        display: block;
+    }
+
+    &__position,
+    &__optional {
+        font-size: 1.05rem;
+    }
+
+    @media (min-width: 720px) {
+        &__data {
+            display: flex;
+            flex-direction: column;
+            margin-top: 0;
+            padding: 0;
+            text-align: left;
+            width: 50%;
+        }
+    }
+}
+.company-recruiter--in-side-bar {
+    padding: 20px 0;
+
+    .company-recruiter {
+        &__info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        &__data {
+            align-items: center;
+            width: auto;
+        }
+
+        &__position {
+            margin-bottom: 15px;
+        }
+
+        &__avatar {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 15px auto;
+        }
+
+        &__avatar-inner {
+            svg {
+                width: 100%;
+                height: 100%;
+            }
+        }
+
+        &__name,
+        &__position {
+            width: 100%;
+            text-align: center;
+            display: inline-block;
+        }
+    }
+
+    @media (min-width: 720px) {
+        max-width: 50%;
+    }
+    @media (min-width: 1248px) {
+        max-width: unset;
+        border: 0;
+        padding: 0;
+
+        .company-recruiter {
+            &__info {
+                flex-direction: column;
+            }
+
+            &__data {
+                width: 100%;
+                align-items: flex-start;
+            }
+
+            &__avatar {
+                margin: 0 0 15px 0;
+            }
+
+            &__name,
+            &__position {
+                text-align: left;
+            }
+        }
+    }
+}
+
+.company-location {
+    &__data {
+        border: 1px solid #e3e6e9;
+        border-top: 0;
+        border-radius: 3px;
+        display: block;
+        padding: 20px;
+    }
+
+    &__name {
+        margin-bottom: 5px;
+    }
+
+    &__contact {
+        margin-top: 10px;
+    }
+
+    &__link {
+        color: var(--action_color);
+        transition: color 0.2s;
+        &:hover {
+            color: var(--action_color_2);
+        }
+    }
+}
+.static-map {
+    overflow: hidden;
+    height: 100%;
+
+    &__picture {
+        width: 100%;
+        height: 225px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    &__image {
+        background-color: #e8e8e8;
+        width: 100%;
+        height: 275px;
+        object-fit: cover;
+    }
+
+    @media (min-width: 720px) {
+        &__image {
+            height: 100%;
+        }
+    }
+}
+
+/* Страница компании */
+.company-page {
+    &__wrap {
+        margin: 30px auto;
+    }
+
+    &__header {
+        border-bottom: 1px solid #e3e6e9;
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+
+        @media (min-width: 720px) {
+            margin-bottom: 50px;
+            padding-bottom: 50px;
+        }
+    }
+
+    &__headline {
+        margin-bottom: 15px;
+    }
+
+    &__grid {
+        display: flex;
+        flex-wrap: wrap;
+
+        @media (min-width: 720px) {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -5px;
+        }
+    }
+
+    &__aside {
+        display: none;
+
+        @media (min-width: 720px) {
+            display: block;
+            padding: 0 5px;
+            width: 8.3%;
+        }
+    }
+
+    &__main {
+        width: 100%;
+
+        @media (min-width: 720px) {
+            padding: 0 5px;
+            width: 83.3%;
+        }
+        @media (min-width: 1248px) {
+            padding: 0 15px;
+            width: 53%;
+        }
+    }
+
+    &__main-inner {
+        margin-bottom: 30px;
+    }
+
+    &__values {
+        margin-bottom: 30px;
+    }
+
+    &__jobs {
+        margin-bottom: 30px;
+    }
+
+    &__side-bar {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
+        @media (min-width: 720px) {
+            margin-left: 8.3%;
+            padding: 0 5px;
+            width: 83.3%;
+        }
+        @media (min-width: 1248px) {
+            margin-left: 0;
+            width: 30%;
+        }
+    }
+
+    &__location {
+        margin-bottom: 50px;
+    }
+
+    &__recruiter-list {
+        margin-bottom: 15px;
+    }
+
+    &__recruiters {
+        margin-top: 15px;
+    }
+
+    @media (min-width: 620px) {
+        &__images {
+            .company-images {
+                &__item--main {
+                    flex: 0 0 95%;
+                }
+            }
+        }
+    }
+    @media (min-width: 1248px) {
+        &__recruiters {
+            margin-top: 0;
+        }
+    }
+}
+
+.company-jobs {
+    &__item {
+        padding: 15px 0;
+        color: #7c8797;
+    }
+
+    &__item-title {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        font-size: 1.125rem;
+        font-weight: 600;
+        line-height: 1.4;
+        margin-bottom: 0.125rem;
+        max-height: 4.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__item-title-link {
+        color: var(--link_color);
+        &:hover {
+            text-decoration: none;
+        }
+    }
+
+    &__item-company-link {
+        color: var(--action_color);
+        &:hover {
+            text-decoration: none;
+            color: var(--action_color_2);
+        }
+    }
+
+    &__item-meta {
+        margin-bottom: 0.25rem;
+    }
+
+    &__item-snippet {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        max-height: 3em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #435269;
+    }
+
+    &__item-button {
+        color: var(--action_color_2);
+        height: 45px;
+        &::before {
+            margin-right: 0.5rem;
+        }
+    }
+}
+
+/* Похожие компании */
+.similar-companies {
+    background-color: #e3e6e9;
+    border-bottom: 1px solid #fff;
+    overflow: hidden;
+    padding: 30px 0;
+
+    &__wrap {
+        margin: 0 auto 30px auto;
+        padding: 0 15px;
+    }
+
+    &__headline {
+        margin-bottom: 15px;
+    }
+
+    &__list, &__wrap{
+        @media (min-width: 1248px){
+            overflow: visible !important;
+        }
+    }
+}
+.company-card {
+    border: 1px solid #e3e6e9;
+    background: #fff;
+    border-radius: 3px;
+    position: relative;
+    width: 297px;
+    height: 100%;
+    margin-right: 10px;
+
+    &__image-container {
+        position: relative;
+    }
+
+    &__image-logo{
+        position: absolute;
+        bottom: 1rem;
+        left: 1rem;
+        width: 70px;
+        height: 70px;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+    }
+
+    &__image {
+        width: 100%;
+        height: 167px;
+        object-fit: cover;
+    }
+
+    &__image-pills {
+        position: absolute;
+        top: 0.75rem;
+        left: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    &__container {
+        position: relative;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+
+        justify-content: space-between;
+        .hover-title {
+            z-index: 15;
+        }
+    }
+    &__container--fixed-height {
+        height: 250px;
+    }
+    &__container--fixed-height-small {
+        height: 170px;
+    }
+
+    &__title {
+        margin-bottom: 5px;
+        position: relative;
+    }
+
+    &__title-link {
+        position: static;
+        font-size: 1.125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        max-width: 100%;
+        display: block;
+        text-overflow: ellipsis;
+        font-weight: 500;
+        line-height: 1.5;
+
+        &:hover {
+            text-decoration: none;
+        }
+    }
+
+    &__locations {
+        position: relative;
+    }
+
+    &__locations-inner {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        position: static;
+    }
+
+    &__branch {
+        color: #7c8797;
+        margin-bottom: 10px;
+    }
+
+    &__footer {
+        flex: 1 1 auto;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+
+        .link {
+            color: var(--action_color_2);
+            line-height: 1.95;
+            &:hover {
+                text-decoration: underline;
+                color: var(--action_color_3);
+            }
+        }
+    }
+
+    &__button {
+        color: var(--action_color_2);
+        line-height: 1.5;
+
+        &::before{
+            margin-right: 5px;
+        }
+    }
+
+    @media (min-width: 720px) {
+        &__container {
+            height: 250px;
+        }
+        &__container--fixed-height {
+            height: 250px;
+        }
+        &__container--fixed-height-small {
+            height: 200px;
+        }
+    }
+}

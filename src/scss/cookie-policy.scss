@@ -1,0 +1,45 @@
+.cookies-page {
+    overflow: hidden;
+
+    &__wrap {
+        padding-top: 25px;
+        padding-bottom: 25px;
+    }
+
+    &__headline {
+        margin-bottom: 1.5rem;
+        font-size: 36px;
+        text-align: center;
+    }
+
+    &__block {
+        margin-bottom: 1rem;
+        font-size: 1rem;
+    }
+
+    &__item-headline {
+        font-size: 1.25rem;
+        font-weight: 500;
+    }
+
+    &__headline-num {
+        font-size: 1.5rem;
+    }
+
+    &__list {
+        padding-left: 2rem;
+    }
+
+    &__list-item {
+        list-style-type: disc;
+    }
+}
+
+.create-modal-link{
+    display: inline-block;
+}
+.link{
+    word-break: break-word;
+    text-align: left;
+    display: inline;
+}
