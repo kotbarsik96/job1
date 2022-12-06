@@ -1436,8 +1436,13 @@ class Spoiler {
             visibility: visible;
         `;
 
+        const video = this.hideable.querySelector("video");
+        if (video) video.play();
     }
     hide() {
+        const video = this.hideable.querySelector("video");
+        if (video) video.pause();
+
         this.isHidden = true;
         if (this.buttonChangingText) this.button.textContent = this.buttonChangingText[0];
         this.button.classList.remove("spoiler__button--shown");
